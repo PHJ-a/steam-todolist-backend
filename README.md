@@ -41,6 +41,11 @@
   "games": {
     "id": "number",
     "title": "string"
+  },
+  "pagination": {
+    "total_count": "number",
+    "page": "number",
+    "page_list_count": "number"
   }
 }
 ```
