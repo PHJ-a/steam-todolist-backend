@@ -1,6 +1,11 @@
 # steam-todolist-backend
 스팀 도전과제 투두 리스트 백엔드
 
+## ERD
+![ERD](https://github.com/PHJ-a/steam-todolist-backend/assets/156567892/dfbcee43-80b3-44ba-b976-5179ec47a7b5)
+
+<br/>
+
 ## API 명세
 ### 로그인
 - 설명: 로그인
