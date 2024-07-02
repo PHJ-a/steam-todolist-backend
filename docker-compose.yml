@@ -1,0 +1,25 @@
+services:
+  nestjs_api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    ports:
+      - '${NEST_API_PORT}:${NEST_API_PORT}'
+    volumes:
+      - ./src:/usr/src/app/src
+  mysql:
+    container_name: ${MYSQL_CONTAINER_NAME}
+    image: mysql:lts
+    restart: always
+    ports:
+      - '${MYSQL_TCP_PORT}:${MYSQL_TCP_PORT}'
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_USER_PASSWORD}
+      - MYSQL_TCP_PORT=${MYSQL_TCP_PORT}
+    volumes:
+      - ./mysql_data:/var/lib/mysql
