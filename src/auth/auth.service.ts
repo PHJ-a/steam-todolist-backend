@@ -64,7 +64,6 @@ export class AuthService {
           reject(new Error('Authentication failed'));
         } else {
           const steamId = result.claimedIdentifier.split('/').pop();
-          console.log(steamId);
           
           try {
             // Get or create user in database
@@ -126,7 +125,6 @@ export class AuthService {
       const decoded = this.jwtService.verify(token, {
         secret: this.accessSecret
       });
-      console.log('Decoded JWT:', decoded);  // 로그 추가
       return decoded
     } catch (error) {
       console.error(error);

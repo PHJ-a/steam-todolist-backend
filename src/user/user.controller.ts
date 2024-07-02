@@ -23,14 +23,12 @@ export class UserController {
 
   @Get('status')
   @UseGuards(AuthGuard)
-  getStatus(@Req() req: Request & { steamid: string }) {
+  async getStatus(@Req() req: Request & { steamid: string }) {
     const steamid = req.steamid
     if (!steamid) {
       return { loggedIn: false };
     }
-    console.log('steamid:', steamid);  // 로그 추가
-    const user = this.userService.getUserInfo(steamid);
-    console.log(user);
-    return { loggedIn: true, user };
+    const user = await this.userService.getUserInfo(steamid);
+    return { loggedIn: true, user: user };
   }
 }
