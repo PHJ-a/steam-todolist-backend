@@ -1,3 +1,4 @@
+import { RefreshToken } from "src/auth/entities/refreshtoken.entity";
 import { Todo } from "src/todo/entities/todo.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
@@ -7,11 +8,53 @@ export class User {
   readonly id: number;
 
   @Column()
-  readonly steam_id: number;
+  steamid: string;
 
   @Column()
-  readonly nickname: string;
+  communityvisibilitystate: number;
+
+  @Column()
+  profilestate: number;
+
+  @Column()
+  personaname: string;
+  
+  @Column()
+  profileurl: string;
+  
+  @Column()
+  avatar: string;
+  
+  @Column()
+  avatarmedium: string;
+  
+  @Column()
+  avatarfull: string;
+  
+  @Column()
+  avatarhash: string;
+  
+  @Column()
+  lastlogoff: number;
+  
+  @Column()
+  personastate: number;
+  
+  @Column()
+  realname: string;
+  
+  @Column()
+  primaryclanid: string;
+  
+  @Column()
+  timecreated: number;
+  
+  @Column()
+  personastateflags: number;
 
   @OneToMany(type => Todo, todo => todo.user)
   todos: Todo[];
+
+  @OneToMany(type => RefreshToken, refreshToken => refreshToken.user)
+  refreshtokens: RefreshToken[];
 }

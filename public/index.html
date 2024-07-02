@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            background-color: #171a21;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2a475e;
+        }
+        #userInfo {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Steam Login Test</h1>
+        <button id="loginButton" onclick="loginWithSteam()">Login with Steam</button>
+        <button id="logoutButton" onclick="logout()" style="display:none;">Logout</button>
+        <div id="userInfo"></div>
+    </div>
+
+    <script>
+        function loginWithSteam() {
+            const returnTo = encodeURIComponent(window.location.href);
+            window.location.href = `/login?returnTo=${returnTo}`;
+        }
+
+        function logout() {
+            // 서버에 로그아웃 요청을 보내고 JWT 쿠키를 삭제합니다.
+            fetch('/logout', { method: 'POST' })
+                .then(() => {
+                    document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    updateUI();
+                });
+        }
+
+        function checkLoginStatus() {
+            fetch('/user/status', {
+                credentials: 'include'  // 쿠키를 포함하여 요청을 보냅니다.
+            })
+            .then(response => response.json())
+            .then(data => {
+              console.log('Login Status:', data);  // 로그 추가
+                if (data.loggedIn) {
+                    document.getElementById('userInfo').innerHTML = `
+                        <h2>Welcome, ${data.user.personaname}!</h2>
+                        <img src="${data.user.avatarfull}" alt="Steam Avatar" style="width:100px;height:100px;">
+                        <p>Steam ID: ${data.user.steamid}</p>
+                    `;
+                    document.getElementById('loginButton').style.display = 'none';
+                    document.getElementById('logoutButton').style.display = 'inline-block';
+                } else {
+                    updateUI();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                updateUI();
+            });
+        }
+
+        function updateUI() {
+            document.getElementById('userInfo').innerHTML = '<p>You are not logged in.</p>';
+            document.getElementById('loginButton').style.display = 'inline-block';
+            document.getElementById('logoutButton').style.display = 'none';
+        }
+
+        // 페이지 로드 시 로그인 상태를 확인합니다.
+        window.onload = checkLoginStatus;
+    </script>
+</body>
+</html>
