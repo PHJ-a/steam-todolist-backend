@@ -5,30 +5,31 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { Response, Request } from 'express';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private authService: AuthService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const response = context.switchToHttp().getResponse();
-    const token = request.cookies['jwt'];
+    const request: Request & { steamid: string }= context.switchToHttp().getRequest();
+    const response: Response = context.switchToHttp().getResponse();
+    const accessToken = request.cookies['jwt'];
     const refreshToken = request.cookies['refreshToken'];
 
-    if (!token && !refreshToken) {
+    if (!accessToken && !refreshToken) {
       throw new UnauthorizedException('No token provided');
     }
 
     let user: { steamid: string } | null = null;
     request.steamid = null;
 
-    if (token) {
+    if (accessToken) {
       try {
-        user = this.authService.verifyJwtToken(token);
+        user = this.authService.verifyJwtToken(accessToken);
       } catch (error) {
         if (error.name !== 'TokenExpiredError') {
-          throw new UnauthorizedException('Invalid token');
+          throw new UnauthorizedException('Invalid access token');
         }
       }
     }
@@ -47,7 +48,8 @@ export class AuthGuard implements CanActivate {
     }
 
     if (!user) {
-      throw new UnauthorizedException('Invalid token');
+      response.clearCookie('isLogin');
+      throw new UnauthorizedException('Invalid refresh token');
     }
 
     request.steamid = user.steamid;

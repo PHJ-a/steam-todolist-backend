@@ -35,6 +35,7 @@ export class AuthController {
   async logout(@Res() res: Response) {
     res.clearCookie('jwt');
     res.clearCookie('refreshToken');
+    res.clearCookie('isLogin');
     res.json({ success: true });
   }
 }
