@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 @Injectable()
@@ -34,7 +39,11 @@ export class AuthGuard implements CanActivate {
       user = this.authService.verifyJwtToken(newTokens.accessToken);
 
       // Set new tokens as cookies
-      this.authService.responseWithTokens(response, newTokens.accessToken, newTokens.refreshToken);
+      this.authService.responseWithTokens(
+        response,
+        newTokens.accessToken,
+        newTokens.refreshToken,
+      );
     }
 
     if (!user) {

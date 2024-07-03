@@ -1,8 +1,8 @@
-import { Achievement } from "src/achievement/entities/achievement.entity";
-import { RefreshToken } from "src/auth/entities/refreshtoken.entity";
-import { Game } from "src/game/entities/game.entity";
-import { Todo } from "src/todo/entities/todo.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Achievement } from 'src/achievement/entities/achievement.entity';
+import { RefreshToken } from 'src/auth/entities/refreshtoken.entity';
+import { Game } from 'src/game/entities/game.entity';
+import { Todo } from 'src/todo/entities/todo.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -15,15 +15,15 @@ export class User {
   @Column()
   personaname: string;
 
-  @OneToMany(type => Todo, todo => todo.user)
+  @OneToMany((type) => Todo, (todo) => todo.user)
   todos: Todo[];
 
-  @OneToMany(type => RefreshToken, refreshToken => refreshToken.user)
+  @OneToMany((type) => RefreshToken, (refreshToken) => refreshToken.user)
   refreshtokens: RefreshToken[];
 
-  @OneToMany(type => Game, game => game.user)
+  @OneToMany((type) => Game, (game) => game.user)
   games: Game[];
 
-  @OneToMany(type => Achievement, achievement => achievement.user)
+  @OneToMany((type) => Achievement, (achievement) => achievement.user)
   achievements: Achievement[];
 }

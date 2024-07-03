@@ -27,7 +27,12 @@ import { ConfigModule } from '@nestjs/config';
       synchronize: true,
       autoLoadEntities: true,
     }),
-    UserModule, TodoModule, AchievementModule, GameModule, AuthModule],
+    UserModule,
+    TodoModule,
+    AchievementModule,
+    GameModule,
+    AuthModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

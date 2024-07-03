@@ -9,7 +9,12 @@ import { AuthModule } from 'src/auth/auth.module';
 import { AuthService } from 'src/auth/auth.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), HttpModule, ConfigModule, AuthModule],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    HttpModule,
+    ConfigModule,
+    AuthModule,
+  ],
   controllers: [UserController],
   providers: [UserService],
 })

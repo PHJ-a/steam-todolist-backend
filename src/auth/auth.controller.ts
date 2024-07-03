@@ -19,7 +19,7 @@ export class AuthController {
     try {
       const tokens = await this.authService.verifySteamResponse(req.url);
       const { accessToken, refreshToken } = tokens;
-      
+
       this.authService.responseWithTokens(res, accessToken, refreshToken);
 
       const returnTo = req.cookies.returnTo || '/';

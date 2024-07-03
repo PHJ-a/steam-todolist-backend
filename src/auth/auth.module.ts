@@ -14,10 +14,10 @@ import { UserService } from 'src/user/user.service';
     TypeOrmModule.forFeature([RefreshToken, User]),
     HttpModule,
     ConfigModule,
-    JwtModule
+    JwtModule,
   ],
   controllers: [AuthController],
   providers: [AuthService],
-  exports: [AuthService]
+  exports: [AuthService],
 })
 export class AuthModule {}
