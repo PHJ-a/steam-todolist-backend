@@ -9,7 +9,7 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(express.static(join(__dirname, '..', 'public')));
   app.enableCors({
-    origin: ['*'],
+    origin: ['http://localhost:5173', 'http://localhost:3000'],
     credentials: true,
   })
   await app.listen(3000);
