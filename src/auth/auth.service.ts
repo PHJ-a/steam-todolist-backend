@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { RefreshToken } from './entities/refreshtoken.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -120,7 +121,7 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  verifyJwtToken(token: string) {
+  verifyJwtToken(token: string): { steamid: string } | null {
     try {
       const decoded = this.jwtService.verify(token, {
         secret: this.accessSecret
@@ -151,7 +152,18 @@ export class AuthService {
       return newTokens;
     } catch (error) {
       console.error('Error refreshing access token:', error);
-      throw new Error('Failed to refresh token');
     }
+  }
+
+  responseWithTokens(res: Response, accessToken: string, refreshToken: string): void {
+    res.cookie('jwt', accessToken, {
+      httpOnly: true,
+      maxAge: 5000, // 5 seconds
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      maxAge: 60 * 1000 // 1 minute
+    });
   }
 }

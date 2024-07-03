@@ -20,17 +20,7 @@ export class AuthController {
       const tokens = await this.authService.verifySteamResponse(req.url);
       const { accessToken, refreshToken } = tokens;
       
-      res.cookie('jwt', accessToken, { 
-        httpOnly: true, 
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 5 * 1000 // 5 seconds
-      });
-
-      res.cookie('refreshToken', refreshToken, { 
-        httpOnly: true, 
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 60 * 1000 // 1 minute
-      });
+      this.authService.responseWithTokens(res, accessToken, refreshToken);
 
       const returnTo = req.cookies.returnTo || '/';
       res.clearCookie('returnTo');

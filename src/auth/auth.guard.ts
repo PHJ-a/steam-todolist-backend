@@ -7,6 +7,7 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
+    const response = context.switchToHttp().getResponse();
     const token = request.cookies['jwt'];
     const refreshToken = request.cookies['refreshToken'];
 
@@ -14,7 +15,7 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('No token provided');
     }
 
-    let user = null;
+    let user: { steamid: string } | null = null;
     request.steamid = null;
 
     if (token) {
@@ -33,15 +34,7 @@ export class AuthGuard implements CanActivate {
       user = this.authService.verifyJwtToken(newTokens.accessToken);
 
       // Set new tokens as cookies
-      request.res.cookie('jwt', newTokens.accessToken, {
-        httpOnly: true,
-        maxAge: 5000, // 5 seconds
-      });
-
-      request.res.cookie('refreshToken', newTokens.refreshToken, {
-        httpOnly: true,
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
+      this.authService.responseWithTokens(response, newTokens.accessToken, newTokens.refreshToken);
     }
 
     if (!user) {
