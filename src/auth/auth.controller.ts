@@ -32,8 +32,9 @@ export class AuthController {
   }
 
   @Get('logout')
-  logout(@Res() res: Response) {
+  async logout(@Res() res: Response) {
     res.clearCookie('jwt');
+    res.clearCookie('refreshToken');
     res.json({ success: true });
   }
 }
