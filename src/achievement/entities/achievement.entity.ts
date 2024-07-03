@@ -1,14 +1,13 @@
 import { Game } from 'src/game/entities/game.entity';
-import { User } from 'src/user/entities/user.entity';
 import {
   Column,
   Entity,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { UserAchievementBridge } from './achivement-user.entity';
 
 @Entity('achievement')
 export class Achievement {
@@ -40,11 +39,6 @@ export class Achievement {
   @JoinColumn({ name: 'game_id', referencedColumnName: 'appid' })
   game: Game;
 
-  @ManyToMany(() => User, (user) => user.achievement)
-  @JoinTable({
-    name: 'user_achievement',
-    joinColumn: { name: 'achievement_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'user_id', referencedColumnName: 'id' },
-  })
-  users: User[];
+  @OneToMany(() => UserAchievementBridge, (bridge) => bridge.achievement)
+  bridge: UserAchievementBridge;
 }
