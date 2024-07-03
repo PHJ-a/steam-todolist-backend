@@ -1,4 +1,3 @@
-import { UserAchievementBridge } from 'src/achievement/entities/achivement-user.entity';
 import { RefreshToken } from 'src/auth/entities/refreshtoken.entity';
 import { Game } from 'src/game/entities/game.entity';
 import { Todo } from 'src/todo/entities/todo.entity';
@@ -23,9 +22,6 @@ export class User {
 
   @ManyToMany(() => Game, (game) => game.users)
   games: Game[];
-
-  @OneToMany(() => UserAchievementBridge, (bridge) => bridge.user)
-  bridge: UserAchievementBridge[];
 
   @OneToMany(() => Todo, (todo) => todo.user)
   todos: Todo[];

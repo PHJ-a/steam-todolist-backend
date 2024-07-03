@@ -10,7 +10,6 @@ import { User } from './user/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { Game } from './game/entities/game.entity';
-import { UserAchievementBridge } from './achievement/entities/achivement-user.entity';
 import { Achievement } from './achievement/entities/achievement.entity';
 
 @Module({
@@ -26,7 +25,7 @@ import { Achievement } from './achievement/entities/achievement.entity';
       username: 'root',
       password: 'root',
       database: 'SteamTodolist',
-      entities: [User, Game, UserAchievementBridge, Achievement],
+      entities: [User, Game, Achievement],
       synchronize: true,
       autoLoadEntities: true,
     }),

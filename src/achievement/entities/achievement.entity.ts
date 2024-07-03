@@ -4,10 +4,8 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserAchievementBridge } from './achivement-user.entity';
 
 @Entity('achievement')
 export class Achievement {
@@ -38,7 +36,4 @@ export class Achievement {
   @ManyToOne(() => Game, (game) => game.achievement)
   @JoinColumn({ name: 'game_id', referencedColumnName: 'appid' })
   game: Game;
-
-  @OneToMany(() => UserAchievementBridge, (bridge) => bridge.achievement)
-  bridge: UserAchievementBridge[];
 }

@@ -14,7 +14,8 @@ export class GameController {
 
   @Get('fetch')
   async fetchGames() {
-    const games = await this.gameService.fetchGames();
+    const steamid = process.env.STEAM_ID;
+    const games = await this.gameService.fetchGames(steamid);
     return games;
   }
 }

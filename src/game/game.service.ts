@@ -14,8 +14,7 @@ export class GameService {
   ) {}
 
   /** db와 steam 게임 데이터 동기화 */
-  async fetchGames() {
-    const steamid = process.env.STEAM_ID;
+  async fetchGames(steamid: string) {
     const user = await this.userService.getUserFromDb(steamid);
     if (!user) {
       throw new NotFoundException('해당 유저 존재 X');

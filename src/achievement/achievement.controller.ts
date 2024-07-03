@@ -11,4 +11,11 @@ export class AchievementController {
     await this.achievementService.fetchCompletedRate(+gameId);
     return result;
   }
+  @Get(':userId/:gameId')
+  async fetchUserAchievement(
+    @Param('userId') userId: string,
+    @Param('gameId') gameId: string,
+  ) {
+    return this.achievementService.getAllAchievementAboutUser(+gameId, userId);
+  }
 }

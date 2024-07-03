@@ -69,11 +69,41 @@ export class AchievementService {
     return { msg: 'update rate' };
   }
 
-  // async getAchievement() {
-  //   const { data } = await axios.get(
-  //     'https://api.steampowered.com/ISteamUserStats/GetGlobalStatsForGame/v1/?appid=578080&name[0]=ACHIVE001',
-  //   );
-  //   console.log(data);
-  //   return data;
-  // }
+  /** 도전과제 응답에 필요한 데이터로 변환하기 */
+  async getAllAchievementAboutUser(gameId: number, steamId: string) {
+    const [userStats, allAchievements] = await Promise.all([
+      this.getUserAchievementFrom(gameId, steamId),
+      this.achievementRepository.find({
+        where: { game_id: gameId },
+      }),
+    ]);
+
+    const map = new Map<
+      string,
+      { apiname: string; achieved: number; unlocktime: Date }
+    >();
+    for (const userStat of userStats) {
+      map.set(userStat.apiname, userStat);
+    }
+    const achievements = allAchievements.map((a) => ({
+      displayName: a.displayName,
+      description: a.description,
+      achieved: map.get(a.name).achieved,
+      end: map.get(a.name).unlocktime,
+      img: map.get(a.name).achieved === 0 ? a.icon_gray : a.icon,
+      completedRate: a.completed_rate,
+    }));
+    return { achievements, gameId };
+  }
+
+  /** 스팀에서 유저 도전과제 진행상태 가져오기 */
+  async getUserAchievementFrom(gameId: number, steamId: string) {
+    const statusUserAchievements = (
+      await axios.get(
+        `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/?appid=${gameId}&key=${process.env.STEAM_API_KEY}&steamid=${steamId}`,
+      )
+    ).data.playerstats.achievements;
+
+    return statusUserAchievements;
+  }
 }
