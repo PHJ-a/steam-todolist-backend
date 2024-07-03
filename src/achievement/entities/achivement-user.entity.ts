@@ -22,5 +22,5 @@ export class UserAchievementBridge {
 
   @ManyToOne(() => Achievement, (achievement) => achievement.bridge)
   @JoinColumn({ name: 'achievement_id', referencedColumnName: 'id' })
-  achievement: Achievement;
+  achievement: Achievement[];
 }

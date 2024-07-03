@@ -25,7 +25,7 @@ export class User {
   games: Game[];
 
   @OneToMany(() => UserAchievementBridge, (bridge) => bridge.user)
-  bridge: UserAchievementBridge;
+  bridge: UserAchievementBridge[];
 
   @OneToMany(() => Todo, (todo) => todo.user)
   todos: Todo[];

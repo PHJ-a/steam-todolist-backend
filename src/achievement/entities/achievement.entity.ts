@@ -40,5 +40,5 @@ export class Achievement {
   game: Game;
 
   @OneToMany(() => UserAchievementBridge, (bridge) => bridge.achievement)
-  bridge: UserAchievementBridge;
+  bridge: UserAchievementBridge[];
 }
