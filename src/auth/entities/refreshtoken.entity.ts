@@ -15,9 +15,6 @@ export class RefreshToken {
   @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn()
-  updatedAt: Date;
-
   @Column({ default: false })
   isRevoked: boolean;
 
