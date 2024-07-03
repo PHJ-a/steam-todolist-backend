@@ -71,7 +71,6 @@ export class AuthService {
           reject(new Error('Authentication failed'));
         } else {
           const steamId = result.claimedIdentifier.split('/').pop();
-
           try {
             // Get or create user in database
             let user: User = await this.userRepository.findOne({
@@ -82,7 +81,7 @@ export class AuthService {
             if (!user) {
               const userInfo = await this.getUserInfoFromSteam(steamId);
               user = this.userRepository.create(userInfo);
-              await this.userRepository.save(userInfo);
+              await this.userRepository.save(user);
             }
 
             // Generate tokens
