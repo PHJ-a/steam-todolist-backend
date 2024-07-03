@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  ParseIntPipe,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -6,9 +18,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('user')
 export class UserController {
-  constructor(
-    private readonly userService: UserService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
@@ -20,17 +30,23 @@ export class UserController {
     return this.userService.getUserInfo(userId);
   }
 
-
   @Get('status')
   @UseGuards(AuthGuard)
   getStatus(@Req() req: Request & { steamid: string }) {
-    const steamid = req.steamid
+    const steamid = req.steamid;
     if (!steamid) {
       return { loggedIn: false };
     }
-    console.log('steamid:', steamid);  // 로그 추가
+    console.log('steamid:', steamid); // 로그 추가
     const user = this.userService.getUserInfo(steamid);
     console.log(user);
     return { loggedIn: true, user };
+  }
+
+  @Get('user')
+  async getUser() {
+    const steamid = process.env.STEAM_ID;
+    const user = await this.userService.getUserFromDb(steamid);
+    return user;
   }
 }

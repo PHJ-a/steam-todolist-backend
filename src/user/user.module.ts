@@ -6,10 +6,15 @@ import { User } from './entities/user.entity';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from 'src/auth/auth.module';
-import { AuthService } from 'src/auth/auth.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), HttpModule, ConfigModule, AuthModule],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    HttpModule,
+    ConfigModule,
+    AuthModule,
+  ],
+  exports: [UserService],
   controllers: [UserController],
   providers: [UserService],
 })

@@ -32,31 +32,37 @@ export class AuthService {
         this.realm,
         true,
         true,
-        []
+        [],
       );
 
-      relyingParty.authenticate('https://steamcommunity.com/openid', false, (error, authUrl) => {
-        if (error) {
-          reject(error);
-        } else if (!authUrl) {
-          reject(new Error('Authentication failed'));
-        } else {
-          resolve(authUrl);
-        }
-      });
+      relyingParty.authenticate(
+        'https://steamcommunity.com/openid',
+        false,
+        (error, authUrl) => {
+          if (error) {
+            reject(error);
+          } else if (!authUrl) {
+            reject(new Error('Authentication failed'));
+          } else {
+            resolve(authUrl);
+          }
+        },
+      );
     });
   }
 
-  async verifySteamResponse(url: string): Promise<{ accessToken: string, refreshToken: string }> {
+  async verifySteamResponse(
+    url: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     return new Promise((resolve, reject) => {
       const relyingParty = new OpenID.RelyingParty(
         this.returnUrl,
         this.realm,
         true,
         true,
-        []
+        [],
       );
-  
+
       relyingParty.verifyAssertion(url, async (error, result) => {
         if (error) {
           reject(error);
@@ -65,20 +71,20 @@ export class AuthService {
         } else {
           const steamId = result.claimedIdentifier.split('/').pop();
           console.log(steamId);
-          
+
           try {
             // Get or create user in database
             let user: User = await this.userRepository.findOne({
               where: {
                 steamid: steamId,
-              }
+              },
             });
             if (!user) {
               const userInfo = await this.getUserInfoFromSteam(steamId);
               user = this.userRepository.create(userInfo);
               await this.userRepository.save(userInfo);
             }
-  
+
             // Generate tokens
             const tokens = await this.generateTokens(user);
             resolve(tokens);
@@ -89,7 +95,6 @@ export class AuthService {
       });
     });
   }
-  
 
   async getUserInfoFromSteam(steamId: string): Promise<User> {
     const url = `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${this.steamApiKey}&steamids=${steamId}`;
@@ -107,13 +112,19 @@ export class AuthService {
 
   async generateTokens(user: Partial<User>) {
     const payload = { steamid: user.steamid };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '5s', secret: this.accessSecret });
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '1m', secret: this.refreshSecret });
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: '5s',
+      secret: this.accessSecret,
+    });
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: '1m',
+      secret: this.refreshSecret,
+    });
 
     const refreshTokenEntity = this.refreshTokenRepository.create({
       token: refreshToken,
       user: user,
-      expires: new Date(Date.now() + 60 * 1000)  // 1 minute from now
+      expires: new Date(Date.now() + 60 * 1000), // 1 minute from now
     });
 
     await this.refreshTokenRepository.save(refreshTokenEntity);
@@ -124,10 +135,10 @@ export class AuthService {
   verifyJwtToken(token: string) {
     try {
       const decoded = this.jwtService.verify(token, {
-        secret: this.accessSecret
+        secret: this.accessSecret,
       });
-      console.log('Decoded JWT:', decoded);  // 로그 추가
-      return decoded
+      console.log('Decoded JWT:', decoded); // 로그 추가
+      return decoded;
     } catch (error) {
       console.error(error);
       return null;
@@ -136,7 +147,9 @@ export class AuthService {
 
   async refreshAccessToken(refreshToken: string) {
     try {
-      const decoded = this.jwtService.verify(refreshToken, { secret: this.refreshSecret });
+      const decoded = this.jwtService.verify(refreshToken, {
+        secret: this.refreshSecret,
+      });
 
       const existingToken = await this.refreshTokenRepository.findOne({
         where: { token: refreshToken, user: { steamid: decoded.steamid } },

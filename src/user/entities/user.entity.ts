@@ -1,60 +1,35 @@
-import { RefreshToken } from "src/auth/entities/refreshtoken.entity";
-import { Todo } from "src/todo/entities/todo.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Achievement } from 'src/achievement/entities/achievement.entity';
+import { RefreshToken } from 'src/auth/entities/refreshtoken.entity';
+import { Game } from 'src/game/entities/game.entity';
+import { Todo } from 'src/todo/entities/todo.entity';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  readonly id: number;
+  id: number;
 
-  @Column()
+  @Column({ unique: true })
   steamid: string;
 
   @Column()
-  communityvisibilitystate: number;
+  nickname: string;
 
-  @Column()
-  profilestate: number;
+  @ManyToMany(() => Game, (game) => game.users)
+  games: Game[];
 
-  @Column()
-  personaname: string;
-  
-  @Column()
-  profileurl: string;
-  
-  @Column()
-  avatar: string;
-  
-  @Column()
-  avatarmedium: string;
-  
-  @Column()
-  avatarfull: string;
-  
-  @Column()
-  avatarhash: string;
-  
-  @Column()
-  lastlogoff: number;
-  
-  @Column()
-  personastate: number;
-  
-  @Column()
-  realname: string;
-  
-  @Column()
-  primaryclanid: string;
-  
-  @Column()
-  timecreated: number;
-  
-  @Column()
-  personastateflags: number;
+  @ManyToMany(() => Achievement, (achievement) => achievement.users)
+  achievement: Achievement[];
 
-  @OneToMany(type => Todo, todo => todo.user)
+  @OneToMany(() => Todo, (todo) => todo.user)
   todos: Todo[];
 
-  @OneToMany(type => RefreshToken, refreshToken => refreshToken.user)
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshtokens: RefreshToken[];
 }

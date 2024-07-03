@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { Game } from './game/entities/game.entity';
 
 @Module({
   imports: [
@@ -23,11 +24,16 @@ import { ConfigModule } from '@nestjs/config';
       username: 'root',
       password: 'root',
       database: 'SteamTodolist',
-      entities: [User],
+      entities: [User, Game],
       synchronize: true,
       autoLoadEntities: true,
     }),
-    UserModule, TodoModule, AchievementModule, GameModule, AuthModule],
+    UserModule,
+    TodoModule,
+    AchievementModule,
+    GameModule,
+    AuthModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

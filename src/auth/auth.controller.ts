@@ -19,17 +19,17 @@ export class AuthController {
     try {
       const tokens = await this.authService.verifySteamResponse(req.url);
       const { accessToken, refreshToken } = tokens;
-      
-      res.cookie('jwt', accessToken, { 
-        httpOnly: true, 
+
+      res.cookie('jwt', accessToken, {
+        httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        maxAge: 5 * 1000 // 5 seconds
+        maxAge: 5 * 1000, // 5 seconds
       });
 
-      res.cookie('refreshToken', refreshToken, { 
-        httpOnly: true, 
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        maxAge: 60 * 1000 // 1 minute
+        maxAge: 60 * 1000, // 1 minute
       });
 
       const returnTo = req.cookies.returnTo || '/';

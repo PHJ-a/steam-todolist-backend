@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
+import { userInfo } from 'os';
 
 @Injectable()
 export class UserService {
@@ -18,15 +19,23 @@ export class UserService {
   ) {}
 
   create(createUserDto: CreateUserDto) {
-    return this.userRepository.create()
+    return this.userRepository.create();
   }
 
   async getUserInfo(steamid: string): Promise<any> {
     const apiKey = this.configService.get('STEAM_API_KEY');
     const url = `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${apiKey}&steamids=${steamid}`;
-    
+
     const response = await lastValueFrom(this.httpService.get(url));
-    console.log(response.data);
+    console.log('getuserinfo', response.data);
     return response.data;
+  }
+
+  async getUserFromDb(steamid: string) {
+    const user = await this.userRepository.find({
+      where: { steamid },
+      relations: { games: true },
+    });
+    return user[0];
   }
 }
