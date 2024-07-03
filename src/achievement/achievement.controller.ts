@@ -7,7 +7,8 @@ export class AchievementController {
 
   @Get('fetch/:gameId')
   async fetchAchievement(@Param('gameId') gameId: string) {
-    const result = await this.achievementService.fetchAchievement(gameId);
+    const result = await this.achievementService.fetchAchievement(+gameId);
+    await this.achievementService.fetchCompletedRate(+gameId);
     return result;
   }
 }

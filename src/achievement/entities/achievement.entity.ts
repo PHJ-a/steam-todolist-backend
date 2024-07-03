@@ -21,10 +21,10 @@ export class Achievement {
   @Column()
   displayName: string;
 
-  @Column()
+  @Column({ default: '' })
   description: string;
 
-  @Column()
+  @Column({ default: 0 })
   completed_rate: number;
 
   @Column()

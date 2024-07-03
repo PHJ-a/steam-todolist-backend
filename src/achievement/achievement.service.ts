@@ -10,67 +10,63 @@ export class AchievementService {
     private readonly achievementRepository: Repository<Achievement>,
   ) {}
 
-  async fetchAchievement(gameId: string) {
-    /** 해당 게임 도전과제 전부 가져오기 */
+  async fetchAchievement(gameId: number) {
+    const gameAchievement = await this.achievementRepository.find({
+      where: { game_id: gameId },
+    });
+    // 도전과제 이미 db에 있으면 완료율만 업데이트
+    if (gameAchievement.length !== 0) {
+      const update = await this.fetchCompletedRate(gameId);
+      return update;
+    } else {
+      // 없으면 도전과제 저장 & 완료율 업데이트
+      const initSave = await this.initSaveAchievement(gameId);
+      await this.fetchCompletedRate(gameId);
+      return initSave;
+    }
+  }
+  /** 처음 도전과제 전부 저장 */
+  async initSaveAchievement(gameId: number) {
     const totalAchievement = (
       await axios.get(
         `http://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?appid=${gameId}&key=${process.env.STEAM_API_KEY}&l=koreana`,
       )
     ).data.game.availableGameStats.achievements;
-    /**해당 게임 도전과제 달성률 가져오기 */
+    for (const achievement of totalAchievement) {
+      const newAchievement = new Achievement();
+      newAchievement.description = achievement.description;
+      newAchievement.displayName = achievement.displayName;
+      newAchievement.game_id = gameId;
+      newAchievement.icon = achievement.icon;
+      newAchievement.icon_gray = achievement.icongray;
+      newAchievement.name = achievement.name;
+
+      await this.achievementRepository.save(newAchievement);
+    }
+    return { msg: 'init saved' };
+  }
+
+  /** 도전과제 완료율 가져오기 */
+  async fetchCompletedRate(gameId: number) {
     const showRates = (
       await axios.get(
         `http://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid=${gameId}`,
       )
     ).data.achievementpercentages.achievements;
 
-    /** 달성률 맵 */
-    const rateHashMap = new Map<string, { name: string; percent: number }>();
-    for (const rate of showRates) {
-      rateHashMap.set(rate.name, rate);
-    }
-
-    const gameAchievement = await this.achievementRepository.find({
-      where: { game_id: +gameId },
+    const achievements = await this.achievementRepository.find({
+      where: { game_id: gameId },
     });
 
-    /** db에 저장된 도전과제 맵 */
-    const dbAchievementMap = new Map<string, Achievement>();
-    for (const achievement of gameAchievement) {
-      dbAchievementMap.set(achievement.name, achievement);
+    const map = new Map<string, { name: string; percent: number }>();
+    for (const rate of showRates) {
+      map.set(rate.name, rate);
     }
-    const updateAchievement: Achievement[] = [];
-    const newAchievements: Achievement[] = [];
-
-    for (const steamAchievement of totalAchievement) {
-      const exist = dbAchievementMap.get(steamAchievement.name);
-      if (!exist) {
-        const newAchievement = new Achievement();
-        newAchievement.description = steamAchievement.description;
-        newAchievement.displayName = steamAchievement.displayName;
-        newAchievement.game_id = parseInt(gameId);
-        newAchievement.icon = steamAchievement.icon;
-        newAchievement.icon_gray = steamAchievement.icongray;
-        newAchievement.name = steamAchievement.name;
-        newAchievement.completed_rate = rateHashMap.get(
-          newAchievement.name,
-        ).percent;
-
-        newAchievements.push(newAchievement);
-      } else {
-        exist.completed_rate = rateHashMap.get(exist.name).percent;
-        updateAchievement.push(exist);
-      }
+    for (const achievement of achievements) {
+      achievement.completed_rate = map.get(achievement.name).percent;
+      await this.achievementRepository.save(achievement);
     }
-    if (newAchievements.length > 0) {
-      await this.achievementRepository.save(newAchievements);
-    }
-
-    if (updateAchievement.length > 0) {
-      await this.achievementRepository.save(updateAchievement);
-    }
-
-    return true;
+    return { msg: 'update rate' };
   }
 
   // async getAchievement() {

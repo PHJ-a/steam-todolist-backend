@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTodoDto } from './dto/create-todo.dto';
-import { UpdateTodoDto } from './dto/update-todo.dto';
 
 @Injectable()
 export class TodoService {
-  create(createTodoDto: CreateTodoDto) {
+  create(createTodoDto) {
     return 'This action adds a new todo';
   }
 
@@ -16,7 +14,7 @@ export class TodoService {
     return `This action returns a #${id} todo`;
   }
 
-  update(id: number, updateTodoDto: UpdateTodoDto) {
+  update(id: number, updateTodoDto) {
     return `This action updates a #${id} todo`;
   }
 
