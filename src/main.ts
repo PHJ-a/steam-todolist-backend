@@ -8,8 +8,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
   app.use(express.static(join(__dirname, '..', 'public')));
+  const backendRootUrl = `http://${process.env.NEST_API_BASE_URL}:${process.env.NEST_API_PORT}`;
+  const frontendRootUrl = `http://${process.env.FRONT_END_BASE_URL}:${process.env.FRONT_END_PORT}`;
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    origin: [backendRootUrl, frontendRootUrl],
     credentials: true,
   })
   const PORT = process.env.NEST_API_PORT || 3000;
