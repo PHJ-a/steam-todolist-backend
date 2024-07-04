@@ -9,14 +9,14 @@ import { Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Response } from 'express';
 import { instanceToPlain } from 'class-transformer';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly userService: UserService,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
   ) {}
@@ -71,20 +71,13 @@ export class AuthService {
         } else if (!result || !result.authenticated) {
           reject(new Error('Authentication failed'));
         } else {
-          const steamId = result.claimedIdentifier.split('/').pop();
+          const steamid = result.claimedIdentifier.split('/').pop();
           try {
             // Get or create user in database
-            let user: User = await this.userRepository.findOne({
-              where: {
-                steamid: steamId,
-              },
-            });
-            if (!user) {
-              const userInfo = await this.getUserInfoFromSteam(steamId);
-              user = this.userRepository.create(userInfo);
-              await this.userRepository.save(user);
-            }
-
+            // let user: User = await this.userService.getUserInfo(steamid);
+            // if (!user) {
+            let user = await this.userService.create({ steamid });
+            // }
             // Generate tokens
             const tokens = await this.generateTokens(user);
             resolve(tokens);
@@ -96,21 +89,9 @@ export class AuthService {
     });
   }
 
-  async getUserInfoFromSteam(steamId: string): Promise<User> {
-    const url = `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${this.steamApiKey}&steamids=${steamId}`;
-    try {
-      const response = await axios.get(url);
-      if (response.data.response.players.length === 0) {
-        throw new Error('No player data found');
-      }
-      return response.data.response.players[0];
-    } catch (error) {
-      console.error('Error fetching Steam user info:', error);
-      throw error;
-    }
-  }
 
-  async generateTokens(user: User) {
+
+  private async generateTokens(user: User) {
     const payload = instanceToPlain(user);
     const accessToken = this.jwtService.sign(payload, {
       expiresIn: '5s',
@@ -126,7 +107,7 @@ export class AuthService {
       user: user,
       expires: new Date(Date.now() + 60 * 1000), // 1 minute from now
     });
-
+    // user should have id column
     await this.refreshTokenRepository.save(refreshTokenEntity);
 
     return { accessToken, refreshToken };

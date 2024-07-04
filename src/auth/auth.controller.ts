@@ -36,8 +36,8 @@ export class AuthController {
       res.clearCookie('returnTo');
       res.redirect(returnTo);
     } catch (error) {
-      console.error('Steam authentication error:', error);
-      res.status(400).json({ error: 'Authentication failed' });
+      console.error('Login returning error:', error);
+      res.status(401).json({ error: 'Authentication failed' });
     }
   }
 

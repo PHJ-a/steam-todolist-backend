@@ -1,3 +1,4 @@
+import { Expose } from 'class-transformer';
 import { Achievement } from 'src/achievement/entities/achievement.entity';
 import { RefreshToken } from 'src/auth/entities/refreshtoken.entity';
 import { Game } from 'src/game/entities/game.entity';
@@ -10,9 +11,11 @@ export class User {
   readonly id: number;
 
   @Column()
+  @Expose()
   steamid: string;
 
   @Column()
+  @Expose()
   personaname: string;
 
   @OneToMany((type) => Todo, (todo) => todo.user)

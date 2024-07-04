@@ -67,11 +67,12 @@
             .then(response => response.json())
             .then(data => {
               console.log(data);
-                if (data.loggedIn) {
+              console.log(data.id);
+                if (data.id) {
                     document.getElementById('userInfo').innerHTML = `
-                        <h2>Welcome, ${data.user.personaname}!</h2>
+                        <h2>Welcome, ${data.personaname}!</h2>
                         <img src="${''}" alt="Steam Avatar" style="width:100px;height:100px;">
-                        <p>Steam ID: ${data.user.steamid}</p>
+                        <p>Steam ID: ${data.steamid}</p>
                     `;
                     document.getElementById('loginButton').style.display = 'none';
                     document.getElementById('logoutButton').style.display = 'inline-block';
