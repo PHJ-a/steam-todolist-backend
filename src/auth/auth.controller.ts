@@ -2,15 +2,23 @@ import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
+import { ConfigService } from '@nestjs/config';
 
 @Controller()
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Get('login')
   async steamLogin(@Req() req: Request, @Res() res: Response) {
     const steamLoginUrl = await this.authService.getSteamLoginUrl();
-    res.cookie('returnTo', req.query.returnTo || '/', { httpOnly: true });
+    const referer = req.headers.referer;
+    const origin = referer ? new URL(referer).origin : `http://${this.configService.get('NEST_API_BASE_URL')}:${this.configService.get('NEST_API_PORT')}`;
+
+    res.cookie('returnTo', origin, { httpOnly: true });
+
     res.redirect(steamLoginUrl);
   }
 
