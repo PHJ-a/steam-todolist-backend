@@ -20,8 +20,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  private readonly realm = 'http://localhost:3000';
-  private readonly returnUrl = 'http://localhost:3000/login/return';
+  private readonly rootUrl = `http://${this.configService.get('NEST_API_BASE_URL')}:${this.configService.get('NEST_API_PORT')}`;
+  private readonly returnUrl = `${this.rootUrl}/login/return`;
   private readonly steamApiKey = this.configService.get('STEAM_API_KEY');
   private readonly accessSecret = this.configService.get('JWT_ACCESS_SECRET');
   private readonly refreshSecret = this.configService.get('JWT_REFRESH_SECRET');
@@ -30,7 +30,7 @@ export class AuthService {
     return new Promise((resolve, reject) => {
       const relyingParty = new OpenID.RelyingParty(
         this.returnUrl,
-        this.realm,
+        this.rootUrl,
         true,
         true,
         [],
@@ -58,7 +58,7 @@ export class AuthService {
     return new Promise((resolve, reject) => {
       const relyingParty = new OpenID.RelyingParty(
         this.returnUrl,
-        this.realm,
+        this.rootUrl,
         true,
         true,
         [],
