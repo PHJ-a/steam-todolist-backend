@@ -182,8 +182,9 @@ export class AuthService {
       maxAge: 60 * 1000, // 1 minute
     });
 
-    res.cookie('isLogin', true, {
-      httpOnly: false,
+    res.cookie('isLoggedin', 'true', {
+      secure: true,
+      maxAge: 1000 * 60 * 15
     });
   }
 }
