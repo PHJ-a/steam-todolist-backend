@@ -12,7 +12,7 @@ import { AuthModule } from './auth/auth.module';
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'mysql',
+      host: process.env.MYSQL_CONTAINER_NAME,
       port: parseInt(process.env.MYSQL_TCP_PORT),
       database: process.env.MYSQL_DATABASE,
       username: process.env.MYSQL_USER,
