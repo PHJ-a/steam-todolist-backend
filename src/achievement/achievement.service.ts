@@ -86,6 +86,7 @@ export class AchievementService {
       map.set(userStat.apiname, userStat);
     }
     const achievements = allAchievements.map((a) => ({
+      id: a.id,
       displayName: a.displayName,
       description: a.description,
       achieved: map.get(a.name).achieved,
@@ -105,5 +106,10 @@ export class AchievementService {
     ).data.playerstats.achievements;
 
     return statusUserAchievements;
+  }
+
+  async getAchievementById(id: number) {
+    const result = await this.achievementRepository.findOne({ where: { id } });
+    return result;
   }
 }

@@ -1,9 +1,11 @@
 import { Game } from 'src/game/entities/game.entity';
+import { Todo } from 'src/todo/entities/todo.entity';
 import {
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -21,7 +23,7 @@ export class Achievement {
   @Column({ default: '' })
   description: string;
 
-  @Column({ default: 0 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   completed_rate: number;
 
   @Column()
@@ -36,4 +38,7 @@ export class Achievement {
   @ManyToOne(() => Game, (game) => game.achievement)
   @JoinColumn({ name: 'game_id', referencedColumnName: 'appid' })
   game: Game;
+
+  @OneToMany(() => Todo, (todo) => todo.achievement)
+  todo: Todo[];
 }

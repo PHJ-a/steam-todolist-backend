@@ -5,7 +5,7 @@ import { GameService } from './game.service';
 export class GameController {
   constructor(private readonly gameService: GameService) {}
 
-  @Get('')
+  @Get()
   async getUserGame() {
     const steamid = process.env.STEAM_ID;
     const games = await this.gameService.findOwnedGame(steamid);

@@ -31,14 +31,18 @@ export class GameService {
       relations: { users: true },
     });
 
+    // db에 저장된 게임 없는 경우
     if (dbGames.length === 0) {
+      const willSaved: Game[] = [];
       for (const gameFromSteam of gamesFromSteam) {
         const newGame = new Game();
         newGame.appid = gameFromSteam.appid;
         newGame.name = gameFromSteam.name;
         newGame.users = [user];
-        await this.gameRepository.save(newGame);
+        willSaved.push(newGame);
       }
+      await this.gameRepository.save(willSaved);
+      return { msg: '첫 게임 저장' };
     }
 
     const dbGameMap = new Map<number, Game>();
@@ -55,7 +59,7 @@ export class GameService {
     for (const gameFromSteam of gamesFromSteam) {
       const dbGame = dbGameMap.get(gameFromSteam.appid);
       if (dbGame) {
-        // 유저가 게임을 갖고 있지 않는 경우
+        // 유저가 db에 저장된 게임을 새로 산 경우 게임과 유저 연결
         if (!dbGame.users.some((user) => user.steamid === steamid)) {
           dbGame.users.push(user);
           updateDbGames.push(dbGame);

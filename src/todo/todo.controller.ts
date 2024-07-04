@@ -15,12 +15,12 @@ export class TodoController {
 
   @Post()
   create(@Body() createTodoDto) {
-    return this.todoService.create(createTodoDto);
+    return this.todoService.create(createTodoDto, 1);
   }
 
   @Get()
   findAll() {
-    return this.todoService.findAll();
+    return this.todoService.findUnfinished(1);
   }
 
   @Get(':id')
