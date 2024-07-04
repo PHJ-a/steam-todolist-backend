@@ -15,6 +15,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { User } from './entities/user.entity';
 
 @Controller('user')
 export class UserController {
@@ -32,12 +33,11 @@ export class UserController {
 
   @Get('status')
   @UseGuards(AuthGuard)
-  async getStatus(@Req() req: Request & { steamid: string }) {
-    const steamid = req.steamid;
-    if (!steamid) {
+  async getStatus(@Req() req: Request & { user: User }) {
+    const user = req.user;
+    if (!user) {
       return { loggedIn: false };
     }
-    const user = await this.userService.getUserInfo(steamid);
     return { loggedIn: true, user: user };
   }
 }
