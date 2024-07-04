@@ -14,6 +14,7 @@ import { AuthModule } from 'src/auth/auth.module';
     ConfigModule,
     AuthModule,
   ],
+  exports: [UserService],
   controllers: [UserController],
   providers: [UserService],
 })

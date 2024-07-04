@@ -10,9 +10,9 @@ export class TodoService {
     @InjectRepository(Todo)
     private readonly todoRepository: Repository<Todo>,
   ) {}
-  async create(createTodoDto: { id: number }, userId: number) {
+  async create(achievementId, userId: number) {
     const exist = await this.todoRepository.exists({
-      where: { achievement: { id: createTodoDto.id }, user_id: userId },
+      where: { achievement: { id: achievementId }, user_id: userId },
     });
     if (exist) {
       throw new BadRequestException('이미 todo를 진행중');
@@ -20,7 +20,7 @@ export class TodoService {
 
     const obj = this.todoRepository.create({
       user_id: userId,
-      achievement_id: createTodoDto.id,
+      achievement_id: achievementId,
     });
     return await this.todoRepository.save(obj);
   }

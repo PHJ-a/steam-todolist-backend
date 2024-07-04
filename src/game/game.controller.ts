@@ -1,20 +1,21 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { GameService } from './game.service';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { UserDeco } from 'src/auth/decorator/user.decorator';
 
 @Controller('game')
+@UseGuards(AuthGuard)
 export class GameController {
   constructor(private readonly gameService: GameService) {}
 
   @Get()
-  async getUserGame() {
-    const steamid = process.env.STEAM_ID;
+  async getUserGame(@UserDeco('steamid') steamid: string) {
     const games = await this.gameService.findOwnedGame(steamid);
     return games;
   }
 
   @Get('fetch')
-  async fetchGames() {
-    const steamid = process.env.STEAM_ID;
+  async fetchGames(@UserDeco('steamid') steamid: string) {
     const games = await this.gameService.fetchGames(steamid);
     return games;
   }

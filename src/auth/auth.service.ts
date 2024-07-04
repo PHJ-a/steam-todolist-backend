@@ -110,26 +110,21 @@ export class AuthService {
     }
   }
 
-<<<<<<< HEAD
-  async generateTokens(user: Partial<User>) {
-    const payload = { steamid: user.steamid };
-=======
   async generateTokens(user: User) {
     const payload = instanceToPlain(user);
->>>>>>> main
     const accessToken = this.jwtService.sign(payload, {
-      expiresIn: '5s',
+      expiresIn: '30m',
       secret: this.accessSecret,
     });
     const refreshToken = this.jwtService.sign(payload, {
-      expiresIn: '1m',
+      expiresIn: '1d',
       secret: this.refreshSecret,
     });
 
     const refreshTokenEntity = this.refreshTokenRepository.create({
       token: refreshToken,
       user: user,
-      expires: new Date(Date.now() + 60 * 1000), // 1 minute from now
+      expires: new Date(Date.now() + 60 * 1000 * 60 * 24), // 1 day from now
     });
 
     await this.refreshTokenRepository.save(refreshTokenEntity);
@@ -142,10 +137,6 @@ export class AuthService {
       const decoded = this.jwtService.verify(token, {
         secret: this.accessSecret,
       });
-<<<<<<< HEAD
-      console.log('Decoded JWT:', decoded); // 로그 추가
-=======
->>>>>>> main
       return decoded;
     } catch (error) {
       console.error(error);
@@ -176,8 +167,6 @@ export class AuthService {
       console.error('Error refreshing access token:', error);
     }
   }
-<<<<<<< HEAD
-=======
 
   responseWithTokens(
     res: Response,
@@ -196,13 +185,11 @@ export class AuthService {
 
     res.cookie('isLoggedin', 'true', {
       secure: true,
-      maxAge: 1000 * 60 * 15
+      maxAge: 1000 * 60 * 15,
     });
   }
 
-  clearAllCookies(
-    res: Response,
-  ): void {
+  clearAllCookies(res: Response): void {
     res.clearCookie('jwt', {
       httpOnly: true,
     });
@@ -213,5 +200,4 @@ export class AuthService {
       secure: true,
     });
   }
->>>>>>> main
 }

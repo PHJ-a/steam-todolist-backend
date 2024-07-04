@@ -17,7 +17,7 @@ export class User {
   @Column({ unique: true })
   steamid: string;
 
-  @Column()
+  @Column({ default: '' })
   nickname: string;
 
   @ManyToMany(() => Game, (game) => game.users)
@@ -28,10 +28,4 @@ export class User {
 
   @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshtokens: RefreshToken[];
-
-  @OneToMany((type) => Game, (game) => game.user)
-  games: Game[];
-
-  @OneToMany((type) => Achievement, (achievement) => achievement.user)
-  achievements: Achievement[];
 }
