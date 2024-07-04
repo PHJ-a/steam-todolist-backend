@@ -1,26 +1,21 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { Game } from './entities/game.entity';
 import { Repository } from 'typeorm';
-import { UserService } from 'src/user/user.service';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class GameService {
   constructor(
     @InjectRepository(Game)
     private readonly gameRepository: Repository<Game>,
-    private readonly userService: UserService,
   ) {}
 
   /** db와 steam 게임 데이터 동기화 */
-  async fetchGames(steamid: string) {
-    const user = await this.userService.getUserFromDb(steamid);
-    if (!user) {
-      throw new NotFoundException('해당 유저 존재 X');
-    }
+  async fetchGames(user: User) {
     const { data } = await axios.get(
-      `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${process.env.STEAM_API_KEY}&steamid=${process.env.STEAM_ID}&include_appinfo=1`,
+      `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${process.env.STEAM_API_KEY}&steamid=${user.steamid}&include_appinfo=1`,
     );
 
     /** 스팀에서 가져온 해당 유저가 보유한 게임 목록 */
@@ -60,7 +55,11 @@ export class GameService {
       const dbGame = dbGameMap.get(gameFromSteam.appid);
       if (dbGame) {
         // 유저가 db에 저장된 게임을 새로 산 경우 게임과 유저 연결
-        if (!dbGame.users.some((user) => user.steamid === steamid)) {
+        if (
+          !dbGame.users.some(
+            (alreadyUser) => alreadyUser.steamid === user.steamid,
+          )
+        ) {
           dbGame.users.push(user);
           updateDbGames.push(dbGame);
         }
@@ -90,5 +89,11 @@ export class GameService {
     });
 
     return ownedGame;
+  }
+  async findGameById(gameId: number) {
+    const game = await this.gameRepository.findOne({
+      where: { appid: gameId },
+    });
+    return game;
   }
 }

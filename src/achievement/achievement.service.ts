@@ -72,7 +72,7 @@ export class AchievementService {
   /** 도전과제 응답에 필요한 데이터로 변환하기 */
   async getAllAchievementAboutUser(gameId: number, steamId: string) {
     const [userStats, allAchievements] = await Promise.all([
-      this.getUserAchievementFrom(gameId, steamId),
+      this.getUserAchievementFromSteam(gameId, steamId),
       this.achievementRepository.find({
         where: { game_id: gameId },
       }),
@@ -90,7 +90,6 @@ export class AchievementService {
       displayName: a.displayName,
       description: a.description,
       achieved: map.get(a.name).achieved,
-      end: map.get(a.name).unlocktime,
       img: map.get(a.name).achieved === 0 ? a.icon_gray : a.icon,
       completedRate: a.completed_rate,
     }));
@@ -98,7 +97,7 @@ export class AchievementService {
   }
 
   /** 스팀에서 유저 도전과제 진행상태 가져오기 */
-  async getUserAchievementFrom(gameId: number, steamId: string) {
+  async getUserAchievementFromSteam(gameId: number, steamId: string) {
     const statusUserAchievements = (
       await axios.get(
         `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/?appid=${gameId}&key=${process.env.STEAM_API_KEY}&steamid=${steamId}`,
@@ -107,7 +106,7 @@ export class AchievementService {
 
     return statusUserAchievements;
   }
-
+  /** db에서 id로 도전과제 가져오기 */
   async getAchievementById(id: number) {
     const result = await this.achievementRepository.findOne({ where: { id } });
     return result;

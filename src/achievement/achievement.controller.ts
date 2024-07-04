@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  InternalServerErrorException,
   Param,
   ParseIntPipe,
   UseGuards,
@@ -14,17 +15,20 @@ import { UserDeco } from 'src/auth/decorator/user.decorator';
 export class AchievementController {
   constructor(private readonly achievementService: AchievementService) {}
 
-  @Get('fetch/:gameId')
-  async fetchAchievement(@Param('gameId', ParseIntPipe) gameId: number) {
-    const result = await this.achievementService.fetchAchievement(gameId);
-    await this.achievementService.fetchCompletedRate(gameId);
-    return result;
-  }
   @Get('/:gameId')
   async fetchUserAchievement(
     @UserDeco('steamid') steamid: string,
     @Param('gameId', ParseIntPipe) gameId: number,
   ) {
-    return this.achievementService.getAllAchievementAboutUser(gameId, steamid);
+    const isFetching = await this.achievementService.fetchAchievement(gameId);
+    await this.achievementService.fetchCompletedRate(gameId);
+    if (isFetching) {
+      return this.achievementService.getAllAchievementAboutUser(
+        gameId,
+        steamid,
+      );
+    } else {
+      throw new InternalServerErrorException('도전과제 패칭 실패');
+    }
   }
 }
