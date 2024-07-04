@@ -33,7 +33,10 @@
     "cookie-parser": "^1.4.6",
     "cookieparser": "^0.1.0",
     "express-session": "^1.18.0",
+<<<<<<< HEAD
     "mysql": "^2.18.1",
+=======
+>>>>>>> main
     "mysql2": "^3.10.2",
     "oauth4webapi": "^2.11.1",
     "openid": "^2.0.12",

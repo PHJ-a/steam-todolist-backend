@@ -5,29 +5,32 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { Response, Request } from 'express';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private authService: AuthService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const token = request.cookies['jwt'];
+    const request: Request & { user: User }= context.switchToHttp().getRequest();
+    const response: Response = context.switchToHttp().getResponse();
+    const accessToken = request.cookies['jwt'];
     const refreshToken = request.cookies['refreshToken'];
 
-    if (!token && !refreshToken) {
+    if (!accessToken && !refreshToken) {
       throw new UnauthorizedException('No token provided');
     }
 
-    let user = null;
-    request.steamid = null;
+    let user: User | null = null;
+    request.user = null;
 
-    if (token) {
+    if (accessToken) {
       try {
-        user = this.authService.verifyJwtToken(token);
+        user = this.authService.verifyJwtToken(accessToken);
       } catch (error) {
         if (error.name !== 'TokenExpiredError') {
-          throw new UnauthorizedException('Invalid token');
+          throw new UnauthorizedException('Invalid access token');
         }
       }
     }
@@ -38,22 +41,19 @@ export class AuthGuard implements CanActivate {
       user = this.authService.verifyJwtToken(newTokens.accessToken);
 
       // Set new tokens as cookies
-      request.res.cookie('jwt', newTokens.accessToken, {
-        httpOnly: true,
-        maxAge: 5000, // 5 seconds
-      });
-
-      request.res.cookie('refreshToken', newTokens.refreshToken, {
-        httpOnly: true,
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
+      this.authService.responseWithTokens(
+        response,
+        newTokens.accessToken,
+        newTokens.refreshToken,
+      );
     }
 
     if (!user) {
-      throw new UnauthorizedException('Invalid token');
+      this.authService.clearAllCookies(response);
+      throw new UnauthorizedException('Invalid refresh token');
     }
 
-    request.steamid = user.steamid;
+    request.user = user;
     return true;
   }
 }

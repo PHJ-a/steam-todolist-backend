@@ -15,6 +15,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { User } from './entities/user.entity';
 
 @Controller('user')
 export class UserController {
@@ -32,15 +33,12 @@ export class UserController {
 
   @Get('status')
   @UseGuards(AuthGuard)
-  getStatus(@Req() req: Request & { steamid: string }) {
-    const steamid = req.steamid;
-    if (!steamid) {
+  async getStatus(@Req() req: Request & { user: User }) {
+    const user = req.user;
+    if (!user) {
       return { loggedIn: false };
     }
-    console.log('steamid:', steamid); // 로그 추가
-    const user = this.userService.getUserInfo(steamid);
-    console.log(user);
-    return { loggedIn: true, user };
+    return { loggedIn: true, user: user };
   }
 
   @Get('user')

@@ -28,4 +28,10 @@ export class User {
 
   @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshtokens: RefreshToken[];
+
+  @OneToMany((type) => Game, (game) => game.user)
+  games: Game[];
+
+  @OneToMany((type) => Achievement, (achievement) => achievement.user)
+  achievements: Achievement[];
 }

@@ -1,5 +1,12 @@
 import { User } from 'src/user/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class RefreshToken {
@@ -9,14 +16,11 @@ export class RefreshToken {
   @Column()
   token: string;
 
-  @ManyToOne(() => User, user => user.refreshtokens)
+  @ManyToOne(() => User, (user) => user.refreshtokens)
   user: User;
 
   @CreateDateColumn()
   createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 
   @Column({ default: false })
   isRevoked: boolean;
