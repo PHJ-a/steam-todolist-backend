@@ -12,8 +12,9 @@ async function bootstrap() {
     origin: ['http://localhost:5173', 'http://localhost:3000'],
     credentials: true,
   })
-  await app.listen(process.env.NEST_API_PORT, () => {
-    console.log(`Server started in port ${process.env.NEST_API_PORT}`)
+  const PORT = process.env.NEST_API_PORT || 3000;
+  await app.listen(PORT, () => {
+    console.log(`Server started in port ${PORT}`)
   });
 }
 bootstrap();
