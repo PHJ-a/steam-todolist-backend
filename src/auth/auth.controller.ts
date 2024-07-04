@@ -11,11 +11,13 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {}
 
+  private readonly returnUrl = `http://${this.configService.get('NEST_API_BASE_URL')}:${this.configService.get('NEST_API_PORT')}`;
+
   @Get('login')
   async steamLogin(@Req() req: Request, @Res() res: Response) {
     const steamLoginUrl = await this.authService.getSteamLoginUrl();
     const referer = req.headers.referer;
-    const origin = referer ? new URL(referer).origin : `http://${this.configService.get('NEST_API_BASE_URL')}:${this.configService.get('NEST_API_PORT')}`;
+    const origin = referer ? new URL(referer).origin : this.returnUrl;
 
     res.cookie('returnTo', origin, { httpOnly: true });
 
@@ -30,7 +32,7 @@ export class AuthController {
 
       this.authService.responseWithTokens(res, accessToken, refreshToken);
 
-      const returnTo = req.cookies.returnTo || '/';
+      const returnTo = req.cookies.returnTo || this.returnUrl;
       res.clearCookie('returnTo');
       res.redirect(returnTo);
     } catch (error) {
@@ -41,9 +43,7 @@ export class AuthController {
 
   @Get('logout')
   async logout(@Res() res: Response) {
-    res.clearCookie('jwt');
-    res.clearCookie('refreshToken');
-    res.clearCookie('isLogin');
+    this.authService.clearAllCookies(res);
     res.json({ success: true });
   }
 }

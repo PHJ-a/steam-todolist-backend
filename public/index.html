@@ -53,7 +53,7 @@
 
         function logout() {
             // 서버에 로그아웃 요청을 보내고 JWT 쿠키를 삭제합니다.
-            fetch('/logout', { method: 'POST' })
+            fetch('/logout', { method: 'get' })
                 .then(() => {
                     document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
                     updateUI();
@@ -66,10 +66,11 @@
             })
             .then(response => response.json())
             .then(data => {
+              console.log(data);
                 if (data.loggedIn) {
                     document.getElementById('userInfo').innerHTML = `
                         <h2>Welcome, ${data.user.personaname}!</h2>
-                        <img src="${data.user.avatarfull}" alt="Steam Avatar" style="width:100px;height:100px;">
+                        <img src="${''}" alt="Steam Avatar" style="width:100px;height:100px;">
                         <p>Steam ID: ${data.user.steamid}</p>
                     `;
                     document.getElementById('loginButton').style.display = 'none';

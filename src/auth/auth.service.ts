@@ -8,6 +8,7 @@ import { RefreshToken } from './entities/refreshtoken.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Response } from 'express';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class AuthService {
@@ -109,8 +110,8 @@ export class AuthService {
     }
   }
 
-  async generateTokens(user: Partial<User>) {
-    const payload = { steamid: user.steamid };
+  async generateTokens(user: User) {
+    const payload = instanceToPlain(user);
     const accessToken = this.jwtService.sign(payload, {
       expiresIn: '5s',
       secret: this.accessSecret,
@@ -185,6 +186,20 @@ export class AuthService {
     res.cookie('isLoggedin', 'true', {
       secure: true,
       maxAge: 1000 * 60 * 15
+    });
+  }
+
+  clearAllCookies(
+    res: Response,
+  ): void {
+    res.clearCookie('jwt', {
+      httpOnly: true,
+    });
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+    });
+    res.clearCookie('isLoggedin', {
+      secure: true,
     });
   }
 }
