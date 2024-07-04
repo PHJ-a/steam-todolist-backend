@@ -48,7 +48,7 @@ export class AuthGuard implements CanActivate {
     }
 
     if (!user) {
-      response.clearCookie('isLogin');
+      response.clearCookie('isLoggedin');
       throw new UnauthorizedException('Invalid refresh token');
     }
 
