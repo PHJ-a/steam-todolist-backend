@@ -10,3 +10,9 @@
 [저장소의 wiki 문서를 확인해주세요.](https://github.com/PHJ-a/steam-todolist-backend/wiki/Todo)
 
 
+
+## 프로젝트 클론 및 Docker 환경 구성
+1. 작업 폴더 생성
+2. 작업 폴더에 코드 클론해서 가져오기
+3. .env-example -> .env 이름 변경 후 파일 수정 후 저장
+4. 작업폴더에서 docker-compose up --build 명령어 실행
