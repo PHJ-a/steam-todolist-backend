@@ -6,13 +6,14 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response, Request } from 'express';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private authService: AuthService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request: Request & { steamid: string }= context.switchToHttp().getRequest();
+    const request: Request & { user: User }= context.switchToHttp().getRequest();
     const response: Response = context.switchToHttp().getResponse();
     const accessToken = request.cookies['jwt'];
     const refreshToken = request.cookies['refreshToken'];
@@ -21,8 +22,8 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('No token provided');
     }
 
-    let user: { steamid: string } | null = null;
-    request.steamid = null;
+    let user: User | null = null;
+    request.user = null;
 
     if (accessToken) {
       try {
@@ -52,7 +53,7 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    request.steamid = user.steamid;
+    request.user = user;
     return true;
   }
 }

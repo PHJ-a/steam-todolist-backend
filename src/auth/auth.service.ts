@@ -131,7 +131,7 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  verifyJwtToken(token: string): { steamid: string } | null {
+  verifyJwtToken(token: string): User | null {
     try {
       const decoded = this.jwtService.verify(token, {
         secret: this.accessSecret,
