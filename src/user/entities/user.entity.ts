@@ -1,3 +1,5 @@
+import { Expose } from 'class-transformer';
+import { Achievement } from 'src/achievement/entities/achievement.entity';
 import { RefreshToken } from 'src/auth/entities/refreshtoken.entity';
 import { Game } from 'src/game/entities/game.entity';
 import { Todo } from 'src/todo/entities/todo.entity';
@@ -15,10 +17,16 @@ export class User {
   id: number;
 
   @Column({ unique: true })
+  @Expose()
   steamid: string;
 
   @Column({ default: '' })
+  @Expose()
   nickname: string;
+
+  @Column()
+  @Expose()
+  avatarfull: string;
 
   @ManyToMany(() => Game, (game) => game.users)
   games: Game[];

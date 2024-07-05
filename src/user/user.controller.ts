@@ -6,6 +6,9 @@ import {
   Query,
   Req,
   UseGuards,
+  UnauthorizedException,
+  NotFoundException,
+  HttpCode,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -21,19 +24,15 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  @Get()
-  getUserInfo(@Query('userId') userId: string) {
-    return this.userService.getUserInfo(userId);
-  }
-
   @Get('status')
+  @HttpCode(200)
   @UseGuards(AuthGuard)
   async getStatus(@Req() req: Request & { user: User }) {
     const user = req.user;
     if (!user) {
-      return { loggedIn: false };
+      throw new NotFoundException(`There isn't user you are searching`);
     }
-    return { loggedIn: true, user: user };
+    return user;
   }
 
   @Get('user')

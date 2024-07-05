@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import * as OpenID from 'openid';
 import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
@@ -9,23 +9,24 @@ import { Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Response } from 'express';
 import { instanceToPlain } from 'class-transformer';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly userService: UserService,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
   ) {}
 
-  private readonly rootUrl = `http://${this.configService.get('NEST_API_BASE_URL')}:${this.configService.get('NEST_API_PORT')}`;
-  private readonly returnUrl = `${this.rootUrl}/login/return`;
-  private readonly steamApiKey = this.configService.get('STEAM_API_KEY');
-  private readonly accessSecret = this.configService.get('JWT_ACCESS_SECRET');
-  private readonly refreshSecret = this.configService.get('JWT_REFRESH_SECRET');
+  private readonly rootUrl: string = `http://${this.configService.get('NEST_API_BASE_URL')}:${this.configService.get('NEST_API_PORT')}`;
+  private readonly returnUrl: string = `${this.rootUrl}/login/return`;
+  private readonly accessSecret: string = this.configService.get('JWT_ACCESS_SECRET');
+  private readonly refreshSecret: string = this.configService.get('JWT_REFRESH_SECRET');
+  private readonly accessExpireTime: number = parseInt(this.configService.get('ACCESS_EXPIRE_TIME'));
+  private readonly refreshExpireTime: number = parseInt(this.configService.get('REFRESH_EXPIRE_TIME'));
 
   async getSteamLoginUrl(): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -44,7 +45,7 @@ export class AuthService {
           if (error) {
             reject(error);
           } else if (!authUrl) {
-            reject(new Error('Authentication failed'));
+            reject(new UnauthorizedException('Authentication failed'));
           } else {
             resolve(authUrl);
           }
@@ -69,22 +70,15 @@ export class AuthService {
         if (error) {
           reject(error);
         } else if (!result || !result.authenticated) {
-          reject(new Error('Authentication failed'));
+          reject(new UnauthorizedException('Authentication failed'));
         } else {
-          const steamId = result.claimedIdentifier.split('/').pop();
+          const steamid = result.claimedIdentifier.split('/').pop();
           try {
             // Get or create user in database
-            let user: User = await this.userRepository.findOne({
-              where: {
-                steamid: steamId,
-              },
-            });
-            if (!user) {
-              const userInfo = await this.getUserInfoFromSteam(steamId);
-              user = this.userRepository.create(userInfo);
-              await this.userRepository.save(user);
-            }
-
+            // let user: User = await this.userService.getUserInfo(steamid);
+            // if (!user) {
+            let user = await this.userService.create({ steamid });
+            // }
             // Generate tokens
             const tokens = await this.generateTokens(user);
             resolve(tokens);
@@ -96,35 +90,23 @@ export class AuthService {
     });
   }
 
-  async getUserInfoFromSteam(steamId: string): Promise<User> {
-    const url = `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${this.steamApiKey}&steamids=${steamId}`;
-    try {
-      const response = await axios.get(url);
-      if (response.data.response.players.length === 0) {
-        throw new Error('No player data found');
-      }
-      return response.data.response.players[0];
-    } catch (error) {
-      console.error('Error fetching Steam user info:', error);
-      throw error;
-    }
-  }
 
-  async generateTokens(user: User) {
+
+  private async generateTokens(user: User) {
     const payload = instanceToPlain(user);
     const accessToken = this.jwtService.sign(payload, {
-      expiresIn: '30m',
+      expiresIn: this.accessExpireTime,
       secret: this.accessSecret,
     });
     const refreshToken = this.jwtService.sign(payload, {
-      expiresIn: '1d',
+      expiresIn: this.refreshExpireTime,
       secret: this.refreshSecret,
     });
 
     const refreshTokenEntity = this.refreshTokenRepository.create({
       token: refreshToken,
       user: user,
-      expires: new Date(Date.now() + 60 * 1000 * 60 * 24), // 1 day from now
+      expires: new Date(Date.now() + this.refreshExpireTime),
     });
 
     await this.refreshTokenRepository.save(refreshTokenEntity);
@@ -139,33 +121,28 @@ export class AuthService {
       });
       return decoded;
     } catch (error) {
-      console.error(error);
-      return null;
+      throw new UnauthorizedException('jwt verification failed');
     }
   }
 
   async refreshAccessToken(refreshToken: string) {
-    try {
-      const decoded = this.jwtService.verify(refreshToken, {
-        secret: this.refreshSecret,
-      });
+    const decoded = this.jwtService.verify(refreshToken, {
+      secret: this.refreshSecret,
+    });
 
-      const existingToken = await this.refreshTokenRepository.findOne({
-        where: { token: refreshToken, user: { steamid: decoded.steamid } },
-        relations: ['user'],
-      });
+    const existingToken = await this.refreshTokenRepository.findOne({
+      where: { token: refreshToken, user: { steamid: decoded.steamid } },
+      relations: ['user'],
+    });
 
-      if (!existingToken) {
-        throw new Error('Invalid refresh token');
-      }
-
-      const newTokens = await this.generateTokens(existingToken.user);
-      await this.refreshTokenRepository.delete({ token: refreshToken });
-
-      return newTokens;
-    } catch (error) {
-      console.error('Error refreshing access token:', error);
+    if (!existingToken) {
+      throw new UnauthorizedException('Invalid refresh token');
     }
+
+    const newTokens = await this.generateTokens(existingToken.user);
+    await this.refreshTokenRepository.delete({ token: refreshToken });
+
+    return newTokens;
   }
 
   responseWithTokens(
@@ -175,17 +152,17 @@ export class AuthService {
   ): void {
     res.cookie('jwt', accessToken, {
       httpOnly: true,
-      maxAge: 5000, // 5 seconds
+      maxAge: this.accessExpireTime,
     });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      maxAge: 60 * 1000, // 1 minute
+      maxAge: this.refreshExpireTime,
     });
 
     res.cookie('isLoggedin', 'true', {
       secure: true,
-      maxAge: 1000 * 60 * 15,
+      maxAge: this.accessExpireTime,
     });
   }
 
