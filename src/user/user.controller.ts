@@ -13,16 +13,15 @@ import {
 import { UserService } from './user.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from './entities/user.entity';
+import { UserDeco } from 'src/auth/decorator/user.decorator';
 
 @Controller('user')
+@UseGuards(AuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('status')
-  @HttpCode(200)
-  @UseGuards(AuthGuard)
-  async getStatus(@Req() req: Request & { user: User }) {
-    const user = req.user;
+  async getStatus(@UserDeco() user: User) {
     if (!user) {
       throw new NotFoundException(`There isn't user you are searching`);
     }
