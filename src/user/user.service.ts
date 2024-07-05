@@ -52,4 +52,12 @@ export class UserService {
       throw error;
     }
   }
+
+  async getUserFromDb(steamid: string) {
+    const user = await this.userRepository.find({
+      where: { steamid },
+      relations: { games: true },
+    });
+    return user[0];
+  }
 }

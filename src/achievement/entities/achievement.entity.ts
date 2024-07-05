@@ -1,11 +1,44 @@
-import { User } from 'src/user/entities/user.entity';
-import { Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Game } from 'src/game/entities/game.entity';
+import { Todo } from 'src/todo/entities/todo.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
-@Entity()
+@Entity('achievement')
 export class Achievement {
   @PrimaryGeneratedColumn()
-  readonly id: number;
+  id: number;
 
-  @ManyToOne((type) => User, (user) => user.achievements)
-  user: User;
+  @Column()
+  name: string;
+
+  @Column()
+  displayName: string;
+
+  @Column({ default: '' })
+  description: string;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  completed_rate: number;
+
+  @Column()
+  icon: string;
+
+  @Column()
+  icon_gray: string;
+
+  @Column()
+  game_id: number;
+
+  @ManyToOne(() => Game, (game) => game.achievement)
+  @JoinColumn({ name: 'game_id', referencedColumnName: 'appid' })
+  game: Game;
+
+  @OneToMany(() => Todo, (todo) => todo.achievement)
+  todo: Todo[];
 }

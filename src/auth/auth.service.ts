@@ -171,9 +171,7 @@ export class AuthService {
     });
   }
 
-  clearAllCookies(
-    res: Response,
-  ): void {
+  clearAllCookies(res: Response): void {
     res.clearCookie('jwt', {
       httpOnly: true,
     });

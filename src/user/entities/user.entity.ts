@@ -3,18 +3,24 @@ import { Achievement } from 'src/achievement/entities/achievement.entity';
 import { RefreshToken } from 'src/auth/entities/refreshtoken.entity';
 import { Game } from 'src/game/entities/game.entity';
 import { Todo } from 'src/todo/entities/todo.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  readonly id: number;
+  id: number;
 
-  @Column()
+  @Column({ unique: true })
   @Expose()
   steamid: string;
 
-  @Column()
+  @Column({ default: '' })
   @Expose()
   nickname: string;
 
@@ -22,15 +28,12 @@ export class User {
   @Expose()
   avatarfull: string;
 
-  @OneToMany((type) => Todo, (todo) => todo.user)
-  todos: Todo[];
-
-  @OneToMany((type) => RefreshToken, (refreshToken) => refreshToken.user)
-  refreshtokens: RefreshToken[];
-
-  @OneToMany((type) => Game, (game) => game.user)
+  @ManyToMany(() => Game, (game) => game.users)
   games: Game[];
 
-  @OneToMany((type) => Achievement, (achievement) => achievement.user)
-  achievements: Achievement[];
+  @OneToMany(() => Todo, (todo) => todo.user)
+  todos: Todo[];
+
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
+  refreshtokens: RefreshToken[];
 }

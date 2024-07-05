@@ -6,7 +6,6 @@ import { User } from './entities/user.entity';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from 'src/auth/auth.module';
-import { AuthService } from 'src/auth/auth.service';
 
 @Module({
   imports: [
@@ -15,6 +14,7 @@ import { AuthService } from 'src/auth/auth.service';
     ConfigModule,
     forwardRef(() => AuthModule),
   ],
+  exports: [UserService],
   controllers: [UserController],
   providers: [UserService],
 })

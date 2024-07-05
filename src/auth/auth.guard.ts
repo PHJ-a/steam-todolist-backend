@@ -13,7 +13,9 @@ export class AuthGuard implements CanActivate {
   constructor(private authService: AuthService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request: Request & { user: User }= context.switchToHttp().getRequest();
+    const request: Request & { user: User } = context
+      .switchToHttp()
+      .getRequest();
     const response: Response = context.switchToHttp().getResponse();
     const accessToken = request.cookies['jwt'];
     const refreshToken = request.cookies['refreshToken'];

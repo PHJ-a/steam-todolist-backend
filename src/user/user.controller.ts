@@ -3,11 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   Query,
-  ParseIntPipe,
   Req,
   UseGuards,
   UnauthorizedException,
@@ -16,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from './entities/user.entity';
 
@@ -37,6 +32,13 @@ export class UserController {
     if (!user) {
       throw new NotFoundException(`There isn't user you are searching`);
     }
+    return user;
+  }
+
+  @Get('user')
+  async getUser() {
+    const steamid = process.env.STEAM_ID;
+    const user = await this.userService.getUserFromDb(steamid);
     return user;
   }
 }
