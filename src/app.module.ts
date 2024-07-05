@@ -19,7 +19,6 @@ import { AuthModule } from './auth/auth.module';
       password: process.env.MYSQL_USER_PASSWORD,
       autoLoadEntities: true,
       synchronize: true,
-      dropSchema: process.env.NODE_ENV === 'development',
     }),
     UserModule,
     TodoModule,

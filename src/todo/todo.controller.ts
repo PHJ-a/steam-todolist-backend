@@ -14,8 +14,7 @@ import { TodoService } from './todo.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { UserDeco } from 'src/auth/decorator/user.decorator';
 import { User } from 'src/user/entities/user.entity';
-import { ResTodoDetailDto } from './dto/res-todoDetail.dto';
-import { ResTodoDto } from './dto/res-todo.dto';
+import { ResTodoDetailDto, ResTodoDto } from './dto/res-todo.dto';
 
 @Controller('todo')
 @UseGuards(AuthGuard)
@@ -28,7 +27,7 @@ export class TodoController {
     @UserDeco('id') userId: number,
   ) {
     const result = await this.todoService.create(achievementId, userId);
-    return new ResTodoDto(result);
+    return { todoId: result.id };
   }
 
   @Get(':id')
@@ -42,17 +41,28 @@ export class TodoController {
     @UserDeco('id') userId: number,
     @Query('complete') complete: boolean,
   ) {
-    const result = await this.todoService.find(userId, complete);
+    const result = await this.todoService.getTodos(userId, complete);
     return result.map((data) => new ResTodoDto(data));
   }
 
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) todoId: number, @UserDeco() user: User) {
-    return this.todoService.update(todoId, user);
+  async update(
+    @Param('id', ParseIntPipe) todoId: number,
+    @UserDeco() user: User,
+  ) {
+    const result = await this.todoService.update(todoId, user);
+    if (result === null) {
+      return {
+        msg: '해당 도전과제가 완료되지 않았습니다. 게임에서 완료되었는지 확인해주세요.',
+      };
+    }
+
+    return { todoId: result.id };
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) todoId: number) {
-    return this.todoService.remove(todoId);
+  async remove(@Param('id', ParseIntPipe) todoId: number) {
+    await this.todoService.remove(todoId);
+    return { todoId };
   }
 }

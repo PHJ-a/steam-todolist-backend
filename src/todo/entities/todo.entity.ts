@@ -1,4 +1,5 @@
 import { Achievement } from 'src/achievement/entities/achievement.entity';
+import { Game } from 'src/game/entities/game.entity';
 import { User } from 'src/user/entities/user.entity';
 import {
   Column,
@@ -28,6 +29,13 @@ export class Todo {
 
   @Column()
   achievement_id: number;
+
+  @Column()
+  game_id: number;
+
+  @ManyToOne(() => Game, (game) => game.todos)
+  @JoinColumn({ name: 'game_id', referencedColumnName: 'appid' })
+  game: Game;
 
   @ManyToOne(() => Achievement, (achievement) => achievement.todo)
   @JoinColumn({ name: 'achievement_id', referencedColumnName: 'id' })

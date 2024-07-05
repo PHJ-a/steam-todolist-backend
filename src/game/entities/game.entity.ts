@@ -1,4 +1,5 @@
 import { Achievement } from 'src/achievement/entities/achievement.entity';
+import { Todo } from 'src/todo/entities/todo.entity';
 import { User } from 'src/user/entities/user.entity';
 import {
   Column,
@@ -19,6 +20,9 @@ export class Game {
 
   @OneToMany(() => Achievement, (achievement) => achievement.game)
   achievement: Achievement[];
+
+  @OneToMany(() => Todo, (todo) => todo.game)
+  todos: Todo[];
 
   @ManyToMany(() => User, (user) => user.games, { nullable: false })
   @JoinTable({

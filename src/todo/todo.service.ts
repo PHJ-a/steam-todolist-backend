@@ -15,27 +15,30 @@ export class TodoService {
     private readonly achievementService: AchievementService,
   ) {}
   async create(achievementId, userId: number) {
-    const exist = await this.todoRepository.exists({
-      where: { achievement: { id: achievementId }, user_id: userId },
+    const exist = await this.todoRepository.findOne({
+      where: { achievement_id: achievementId, user_id: userId },
     });
     if (exist) {
       throw new BadRequestException('이미 todo를 진행중');
     }
-
+    const queryAchievement =
+      await this.achievementService.getAchievementById(achievementId);
     const obj = this.todoRepository.create({
       user_id: userId,
       achievement_id: achievementId,
+      game_id: queryAchievement.game_id,
     });
     return await this.todoRepository.save(obj);
   }
 
-  async find(userId: number, complete: boolean) {
+  async getTodos(userId: number, complete: boolean) {
     let constraint: FindOptionsWhere<Todo> = { user_id: userId };
     if (typeof complete === 'boolean') {
       constraint = { ...constraint, isFinished: complete };
     }
     const todoList = await this.todoRepository.find({
       where: constraint,
+      relations: { achievement: true, game: true },
     });
     return todoList;
   }
@@ -43,10 +46,9 @@ export class TodoService {
   async getTodoDetail(id: number) {
     const todo = await this.todoRepository.findOne({
       where: { id: id },
-      relations: { achievement: true },
+      relations: { achievement: true, game: true },
     });
-    const game = await this.gameService.findGameById(todo.achievement.game_id);
-    return { todo, game };
+    return todo;
   }
 
   async update(id: number, user: User) {
@@ -70,17 +72,15 @@ export class TodoService {
     )[0];
     // 실제로 도전과제가 완료되지 않은 경우
     if (newFetchingData.achieved === 0) {
-      return {
-        msg: '해당 도전 과제는 완료되지 않았습니다. 게임에서 완료됐는지 확인해 주세요.',
-      };
+      return null;
     } else {
       // 실제로 완료됐으면 db에도 업데이트
-      const updated = await this.todoRepository.save({
+      const updatedTodo = await this.todoRepository.save({
         ...todo,
         end: new Date(newFetchingData.unlocktime * 1000),
         isFinished: true,
       });
-      return { id: updated.id };
+      return updatedTodo;
     }
   }
 
@@ -89,7 +89,8 @@ export class TodoService {
     if (!todo) {
       throw new BadRequestException('없는 todo');
     }
-    await this.todoRepository.delete({ id: id });
-    return { id };
+    const removedTodo = await this.todoRepository.delete({ id: id });
+    console.log(removedTodo);
+    return removedTodo;
   }
 }
