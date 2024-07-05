@@ -14,7 +14,7 @@ export class ResTodoDetailDto {
     this.id = data.todo.id;
     this.gameName = data.game.name;
     this.gameId = data.game.appid;
-    this.achieveName = data.todo.achievement.name;
+    this.achieveName = data.todo.achievement.displayName;
     this.achieveDescription = data.todo.achievement.description;
     this.achieveIcon = data.todo.achievement.icon_gray;
     this.start = data.todo.start;
