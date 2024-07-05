@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import * as OpenID from 'openid';
 import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
@@ -45,7 +45,7 @@ export class AuthService {
           if (error) {
             reject(error);
           } else if (!authUrl) {
-            reject(new Error('Authentication failed'));
+            reject(new UnauthorizedException('Authentication failed'));
           } else {
             resolve(authUrl);
           }
@@ -70,7 +70,7 @@ export class AuthService {
         if (error) {
           reject(error);
         } else if (!result || !result.authenticated) {
-          reject(new Error('Authentication failed'));
+          reject(new UnauthorizedException('Authentication failed'));
         } else {
           const steamid = result.claimedIdentifier.split('/').pop();
           try {
@@ -106,9 +106,9 @@ export class AuthService {
     const refreshTokenEntity = this.refreshTokenRepository.create({
       token: refreshToken,
       user: user,
-      expires: new Date(Date.now() + this.refreshExpireTime), // 1 minute from now
+      expires: new Date(Date.now() + this.refreshExpireTime),
     });
-    // user should have id column
+
     await this.refreshTokenRepository.save(refreshTokenEntity);
 
     return { accessToken, refreshToken };
@@ -121,33 +121,28 @@ export class AuthService {
       });
       return decoded;
     } catch (error) {
-      console.error(error);
-      return null;
+      throw new UnauthorizedException('jwt verification failed');
     }
   }
 
   async refreshAccessToken(refreshToken: string) {
-    try {
-      const decoded = this.jwtService.verify(refreshToken, {
-        secret: this.refreshSecret,
-      });
+    const decoded = this.jwtService.verify(refreshToken, {
+      secret: this.refreshSecret,
+    });
 
-      const existingToken = await this.refreshTokenRepository.findOne({
-        where: { token: refreshToken, user: { steamid: decoded.steamid } },
-        relations: ['user'],
-      });
+    const existingToken = await this.refreshTokenRepository.findOne({
+      where: { token: refreshToken, user: { steamid: decoded.steamid } },
+      relations: ['user'],
+    });
 
-      if (!existingToken) {
-        throw new Error('Invalid refresh token');
-      }
-
-      const newTokens = await this.generateTokens(existingToken.user);
-      await this.refreshTokenRepository.delete({ token: refreshToken });
-
-      return newTokens;
-    } catch (error) {
-      console.error('Error refreshing access token:', error);
+    if (!existingToken) {
+      throw new UnauthorizedException('Invalid refresh token');
     }
+
+    const newTokens = await this.generateTokens(existingToken.user);
+    await this.refreshTokenRepository.delete({ token: refreshToken });
+
+    return newTokens;
   }
 
   responseWithTokens(

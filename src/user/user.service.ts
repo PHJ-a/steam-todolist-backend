@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -27,7 +27,6 @@ export class UserService {
   async getUserInfo(steamid: string): Promise<User> {
     // Todo: 일단 DB를 검색하고 해당 유저의 정보가 없으면 steam api에 요청하기?
     const userFromSteam = await this.getUserInfoFromSteam(steamid);
-    console.log(userFromSteam);
     const user: User = plainToInstance(User, userFromSteam, {
       excludeExtraneousValues: true,
     });
@@ -37,19 +36,14 @@ export class UserService {
   private async getUserInfoFromSteam(steamid: string): Promise<User> {
     const steamApiKey = this.configService.get('STEAM_API_KEY');
     const url = `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${steamApiKey}&steamids=${steamid}`;
-    try {
-      const response = await axios.get(url);
-      if (response.data.response.players.length === 0) {
-        throw new Error('No player data found');
-      }
-      const player = response.data.response.players[0];
-      return {
-        ...player,
-        nickname: player.personaname,
-      }
-    } catch (error) {
-      console.error('Error fetching Steam user info:', error);
-      throw error;
+    const response = await axios.get(url);
+    if (response.data.response.players.length === 0) {
+      throw new NotFoundException('No player data found');
+    }
+    const player = response.data.response.players[0];
+    return {
+      ...player,
+      nickname: player.personaname,
     }
   }
 

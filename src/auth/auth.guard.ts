@@ -28,13 +28,7 @@ export class AuthGuard implements CanActivate {
     request.user = null;
 
     if (accessToken) {
-      try {
-        user = this.authService.verifyJwtToken(accessToken);
-      } catch (error) {
-        if (error.name !== 'TokenExpiredError') {
-          throw new UnauthorizedException('Invalid access token');
-        }
-      }
+      user = this.authService.verifyJwtToken(accessToken);
     }
 
     // access token has expired
