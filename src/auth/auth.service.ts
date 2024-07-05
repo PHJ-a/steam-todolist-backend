@@ -115,7 +115,8 @@ export class AuthService {
       const decoded = this.jwtService.verify(token, {
         secret: this.accessSecret,
       });
-      return decoded;
+      const { iat, exp, ...payload } = decoded;
+      return payload;
     } catch (error) {
       throw new UnauthorizedException('jwt verification failed');
     }
