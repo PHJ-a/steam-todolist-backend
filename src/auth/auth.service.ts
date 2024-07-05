@@ -23,10 +23,16 @@ export class AuthService {
 
   private readonly rootUrl: string = `http://${this.configService.get('NEST_API_BASE_URL')}:${this.configService.get('NEST_API_PORT')}`;
   private readonly returnUrl: string = `${this.rootUrl}/login/return`;
-  private readonly accessSecret: string = this.configService.get('JWT_ACCESS_SECRET');
-  private readonly refreshSecret: string = this.configService.get('JWT_REFRESH_SECRET');
-  private readonly accessExpireTime: number = parseInt(this.configService.get('ACCESS_EXPIRE_TIME'));
-  private readonly refreshExpireTime: number = parseInt(this.configService.get('REFRESH_EXPIRE_TIME'));
+  private readonly accessSecret: string =
+    this.configService.get('JWT_ACCESS_SECRET');
+  private readonly refreshSecret: string =
+    this.configService.get('JWT_REFRESH_SECRET');
+  private readonly accessExpireTime: number = parseInt(
+    this.configService.get('ACCESS_EXPIRE_TIME'),
+  );
+  private readonly refreshExpireTime: number = parseInt(
+    this.configService.get('REFRESH_EXPIRE_TIME'),
+  );
 
   async getSteamLoginUrl(): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -74,11 +80,7 @@ export class AuthService {
         } else {
           const steamid = result.claimedIdentifier.split('/').pop();
           try {
-            // Get or create user in database
-            // let user: User = await this.userService.getUserInfo(steamid);
-            // if (!user) {
-            let user = await this.userService.create({ steamid });
-            // }
+            let user: User = await this.userService.getUserInfo(steamid);
             // Generate tokens
             const tokens = await this.generateTokens(user);
             resolve(tokens);
@@ -89,8 +91,6 @@ export class AuthService {
       });
     });
   }
-
-
 
   private async generateTokens(user: User) {
     const payload = instanceToPlain(user);
@@ -119,7 +119,8 @@ export class AuthService {
       const decoded = this.jwtService.verify(token, {
         secret: this.accessSecret,
       });
-      return decoded;
+      const { iat, exp, ...payload } = decoded;
+      return payload;
     } catch (error) {
       throw new UnauthorizedException('jwt verification failed');
     }

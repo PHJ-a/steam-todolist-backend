@@ -65,8 +65,7 @@
             })
             .then(response => response.json())
             .then(data => {
-              console.log(data.avatarfull);
-
+              console.log('data: ', data);
                 if (data.id) {
                     document.getElementById('userInfo').innerHTML = `
                         <h2>Welcome, ${data.nickname}!</h2>

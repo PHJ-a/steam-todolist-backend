@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
@@ -16,20 +15,24 @@ export class UserService {
     private readonly configService: ConfigService,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const { steamid } = createUserDto
-    const userInfo = await this.getUserInfo(steamid);
-    const user = this.userRepository.create(userInfo);
-    await this.userRepository.save(user);
-    return user;
-  }
+  // async create(createUserDto: CreateUserDto): Promise<User> {
+  //   const { steamid } = createUserDto
+  //   const userInfo = await this.getUserInfo(steamid);
+  //   const user = this.userRepository.create(userInfo);
+  //   await this.userRepository.save(user);
+  //   return user;
+  // }
 
   async getUserInfo(steamid: string): Promise<User> {
-    // Todo: 일단 DB를 검색하고 해당 유저의 정보가 없으면 steam api에 요청하기?
+    /** db에 있으면 바로 반환 */
+    const userFromDb = await this.getUserFromDb(steamid);
+    if (userFromDb) return userFromDb;
+
+    /** db에 없으면 Steam에서 받아와서 DB에 저장 후 반환 */
     const userFromSteam = await this.getUserInfoFromSteam(steamid);
-    const user: User = plainToInstance(User, userFromSteam, {
-      excludeExtraneousValues: true,
-    });
+    const user: User = this.userRepository.create(userFromSteam);
+    await this.userRepository.save(user);
+
     return user;
   }
 
@@ -44,14 +47,14 @@ export class UserService {
     return {
       ...player,
       nickname: player.personaname,
-    }
+    };
   }
 
   async getUserFromDb(steamid: string) {
-    const user = await this.userRepository.find({
+    const user = await this.userRepository.findOne({
       where: { steamid },
       relations: { games: true },
     });
-    return user[0];
+    return user;
   }
 }
