@@ -27,6 +27,7 @@ export class UserService {
   async getUserInfo(steamid: string): Promise<User> {
     // Todo: 일단 DB를 검색하고 해당 유저의 정보가 없으면 steam api에 요청하기?
     const userFromSteam = await this.getUserInfoFromSteam(steamid);
+    console.log(userFromSteam);
     const user: User = plainToInstance(User, userFromSteam, {
       excludeExtraneousValues: true,
     });
@@ -41,7 +42,11 @@ export class UserService {
       if (response.data.response.players.length === 0) {
         throw new Error('No player data found');
       }
-      return response.data.response.players[0];
+      const player = response.data.response.players[0];
+      return {
+        ...player,
+        nickname: player.personaname,
+      }
     } catch (error) {
       console.error('Error fetching Steam user info:', error);
       throw error;

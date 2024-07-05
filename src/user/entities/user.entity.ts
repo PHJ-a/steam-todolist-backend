@@ -16,7 +16,11 @@ export class User {
 
   @Column()
   @Expose()
-  personaname: string;
+  nickname: string;
+
+  @Column()
+  @Expose()
+  avatarfull: string;
 
   @OneToMany((type) => Todo, (todo) => todo.user)
   todos: Todo[];
