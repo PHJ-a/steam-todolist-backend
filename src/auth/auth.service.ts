@@ -74,11 +74,7 @@ export class AuthService {
         } else {
           const steamid = result.claimedIdentifier.split('/').pop();
           try {
-            // Get or create user in database
-            // let user: User = await this.userService.getUserInfo(steamid);
-            // if (!user) {
-            let user = await this.userService.create({ steamid });
-            // }
+            let user: User = await this.userService.getUserInfo(steamid);
             // Generate tokens
             const tokens = await this.generateTokens(user);
             resolve(tokens);
