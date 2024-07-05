@@ -47,7 +47,7 @@ export class UserService {
     return {
       ...player,
       nickname: player.personaname,
-    }
+    };
   }
 
   async getUserFromDb(steamid: string) {
