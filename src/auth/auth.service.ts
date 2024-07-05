@@ -21,11 +21,12 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  private readonly rootUrl = `http://${this.configService.get('NEST_API_BASE_URL')}:${this.configService.get('NEST_API_PORT')}`;
-  private readonly returnUrl = `${this.rootUrl}/login/return`;
-  private readonly steamApiKey = this.configService.get('STEAM_API_KEY');
-  private readonly accessSecret = this.configService.get('JWT_ACCESS_SECRET');
-  private readonly refreshSecret = this.configService.get('JWT_REFRESH_SECRET');
+  private readonly rootUrl: string = `http://${this.configService.get('NEST_API_BASE_URL')}:${this.configService.get('NEST_API_PORT')}`;
+  private readonly returnUrl: string = `${this.rootUrl}/login/return`;
+  private readonly accessSecret: string = this.configService.get('JWT_ACCESS_SECRET');
+  private readonly refreshSecret: string = this.configService.get('JWT_REFRESH_SECRET');
+  private readonly accessExpireTime: number = parseInt(this.configService.get('ACCESS_EXPIRE_TIME'));
+  private readonly refreshExpireTime: number = parseInt(this.configService.get('REFRESH_EXPIRE_TIME'));
 
   async getSteamLoginUrl(): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -94,18 +95,18 @@ export class AuthService {
   private async generateTokens(user: User) {
     const payload = instanceToPlain(user);
     const accessToken = this.jwtService.sign(payload, {
-      expiresIn: '5s',
+      expiresIn: this.accessExpireTime,
       secret: this.accessSecret,
     });
     const refreshToken = this.jwtService.sign(payload, {
-      expiresIn: '1m',
+      expiresIn: this.refreshExpireTime,
       secret: this.refreshSecret,
     });
 
     const refreshTokenEntity = this.refreshTokenRepository.create({
       token: refreshToken,
       user: user,
-      expires: new Date(Date.now() + 60 * 1000), // 1 minute from now
+      expires: new Date(Date.now() + this.refreshExpireTime), // 1 minute from now
     });
     // user should have id column
     await this.refreshTokenRepository.save(refreshTokenEntity);
@@ -156,17 +157,17 @@ export class AuthService {
   ): void {
     res.cookie('jwt', accessToken, {
       httpOnly: true,
-      maxAge: 5000, // 5 seconds
+      maxAge: this.accessExpireTime,
     });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      maxAge: 60 * 1000, // 1 minute
+      maxAge: this.refreshExpireTime,
     });
 
     res.cookie('isLoggedin', 'true', {
       secure: true,
-      maxAge: 1000 * 60 * 15
+      maxAge: this.accessExpireTime,
     });
   }
 

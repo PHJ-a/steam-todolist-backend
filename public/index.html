@@ -65,12 +65,12 @@
             })
             .then(response => response.json())
             .then(data => {
-              console.log(data);
-              console.log(data.id);
+              console.log(data.avatarfull);
+
                 if (data.id) {
                     document.getElementById('userInfo').innerHTML = `
-                        <h2>Welcome, ${data.personaname}!</h2>
-                        <img src="${''}" alt="Steam Avatar" style="width:100px;height:100px;">
+                        <h2>Welcome, ${data.nickname}!</h2>
+                        <img src="${data.avatarfull}" alt="Steam Avatar" style="width:100px;height:100px;">
                         <p>Steam ID: ${data.steamid}</p>
                     `;
                     document.getElementById('loginButton').style.display = 'none';
