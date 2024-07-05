@@ -113,18 +113,18 @@ export class AuthService {
   async generateTokens(user: User) {
     const payload = instanceToPlain(user);
     const accessToken = this.jwtService.sign(payload, {
-      expiresIn: '5s',
+      expiresIn: '30m',
       secret: this.accessSecret,
     });
     const refreshToken = this.jwtService.sign(payload, {
-      expiresIn: '1m',
+      expiresIn: '1d',
       secret: this.refreshSecret,
     });
 
     const refreshTokenEntity = this.refreshTokenRepository.create({
       token: refreshToken,
       user: user,
-      expires: new Date(Date.now() + 60 * 1000), // 1 minute from now
+      expires: new Date(Date.now() + 60 * 1000 * 60 * 24), // 1 day from now
     });
 
     await this.refreshTokenRepository.save(refreshTokenEntity);
@@ -185,13 +185,11 @@ export class AuthService {
 
     res.cookie('isLoggedin', 'true', {
       secure: true,
-      maxAge: 1000 * 60 * 15
+      maxAge: 1000 * 60 * 15,
     });
   }
 
-  clearAllCookies(
-    res: Response,
-  ): void {
+  clearAllCookies(res: Response): void {
     res.clearCookie('jwt', {
       httpOnly: true,
     });

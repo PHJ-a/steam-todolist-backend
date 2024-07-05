@@ -28,4 +28,12 @@ export class UserService {
     const playerData = response.data.response.players[0];
     return playerData;
   }
+
+  async getUserFromDb(steamid: string) {
+    const user = await this.userRepository.find({
+      where: { steamid },
+      relations: { games: true },
+    });
+    return user[0];
+  }
 }

@@ -1,42 +1,27 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
+  InternalServerErrorException,
+  UseGuards,
 } from '@nestjs/common';
 import { GameService } from './game.service';
-import { CreateGameDto } from './dto/create-game.dto';
-import { UpdateGameDto } from './dto/update-game.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { UserDeco } from 'src/auth/decorator/user.decorator';
+import { User } from 'src/user/entities/user.entity';
 
 @Controller('game')
+@UseGuards(AuthGuard)
 export class GameController {
   constructor(private readonly gameService: GameService) {}
 
-  @Post()
-  create(@Body() createGameDto: CreateGameDto) {
-    return this.gameService.create(createGameDto);
-  }
-
   @Get()
-  findAll() {
-    return this.gameService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.gameService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGameDto: UpdateGameDto) {
-    return this.gameService.update(+id, updateGameDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.gameService.remove(+id);
+  async getUserGame(@UserDeco() user: User) {
+    const isFetchFinished = await this.gameService.fetchGames(user);
+    if (isFetchFinished) {
+      const games = await this.gameService.findOwnedGame(user.steamid);
+      return games;
+    } else {
+      throw new InternalServerErrorException('게임 패칭 실패');
+    }
   }
 }

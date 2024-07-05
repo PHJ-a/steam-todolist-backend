@@ -1,11 +1,30 @@
+import { Achievement } from 'src/achievement/entities/achievement.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  PrimaryColumn,
+} from 'typeorm';
 
-@Entity()
+@Entity('game')
 export class Game {
-  @PrimaryGeneratedColumn()
-  readonly id: number;
+  @PrimaryColumn()
+  appid: number;
 
-  @ManyToOne((type) => User, (user) => user.games)
-  user: User;
+  @Column()
+  name: string;
+
+  @OneToMany(() => Achievement, (achievement) => achievement.game)
+  achievement: Achievement[];
+
+  @ManyToMany(() => User, (user) => user.games, { nullable: false })
+  @JoinTable({
+    name: 'user_game',
+    joinColumn: { name: 'appid', referencedColumnName: 'appid' },
+    inverseJoinColumn: { name: 'steamid', referencedColumnName: 'steamid' },
+  })
+  users: User[];
 }
