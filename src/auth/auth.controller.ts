@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, Redirect, Req, Res } from '@nestjs/common';
+import { Controller, Get, HttpCode, Redirect, Req, Res, UnauthorizedException } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { ConfigService } from '@nestjs/config';
@@ -15,7 +15,6 @@ export class AuthController {
   @Get('login')
   async steamLogin(@Req() req: Request, @Res() res: Response) {
     const steamLoginUrl = await this.authService.getSteamLoginUrl();
-    
     const referer = req.headers.referer;
     const origin = referer ? new URL(referer).origin : this.returnUrl;
 
@@ -26,14 +25,19 @@ export class AuthController {
 
   @Get('login/return')
   async steamReturn(@Req() req: Request, @Res() res: Response) {
-    const tokens = await this.authService.verifySteamResponse(req.url);
-    const { accessToken, refreshToken } = tokens;
+    try {
+      const tokens = await this.authService.verifySteamResponse(req.url);
+      const { accessToken, refreshToken } = tokens;
 
-    this.authService.responseWithTokens(res, accessToken, refreshToken);
+      this.authService.responseWithTokens(res, accessToken, refreshToken);
 
-    const returnTo = req.cookies.returnTo || this.returnUrl;
-    res.clearCookie('returnTo');
-    res.redirect(returnTo);
+      const returnTo = req.cookies.returnTo || this.returnUrl;
+      res.clearCookie('returnTo');
+      res.redirect(returnTo);
+    } catch (error) {
+      console.error('login/return error:', error);
+      throw new UnauthorizedException('Authentication failed');
+    }
   }
 
   @Get('logout')
