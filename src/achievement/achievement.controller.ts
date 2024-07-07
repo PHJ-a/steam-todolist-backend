@@ -20,15 +20,14 @@ export class AchievementController {
     @UserDeco('steamid') steamid: string,
     @Param('gameId', ParseIntPipe) gameId: number,
   ) {
-    const isFetching = await this.achievementService.fetchAchievement(gameId);
-    await this.achievementService.fetchCompletedRate(gameId);
-    if (isFetching) {
-      return this.achievementService.getAllAchievementAboutUser(
-        gameId,
-        steamid,
-      );
-    } else {
-      throw new InternalServerErrorException('도전과제 패칭 실패');
+    const exist = await this.achievementService.checkAchieveExist(gameId);
+    if (!exist) {
+      await this.achievementService.initSaveAchievement(gameId);
     }
+
+    const achievements =
+      await this.achievementService.getAllAchievementAboutUser(gameId, steamid);
+
+    return { achievements, gameId };
   }
 }

@@ -2,7 +2,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { Todo } from './entities/todo.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { GameService } from 'src/game/game.service';
 import { AchievementService } from 'src/achievement/achievement.service';
 import { User } from 'src/user/entities/user.entity';
 
@@ -11,7 +10,6 @@ export class TodoService {
   constructor(
     @InjectRepository(Todo)
     private readonly todoRepository: Repository<Todo>,
-    private readonly gameService: GameService,
     private readonly achievementService: AchievementService,
   ) {}
   async create(achievementId, userId: number) {
