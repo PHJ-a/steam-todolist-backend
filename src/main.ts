@@ -4,12 +4,19 @@ import * as express from 'express';
 import * as cookieParser from 'cookie-parser';
 import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const backendRootUrl = `http://${process.env.NEST_API_BASE_URL}:${process.env.NEST_API_PORT}`;
-  const frontendRootUrl = `http://${process.env.FRONT_END_BASE_URL}:${process.env.FRONT_END_PORT}`;
-  const PORT = process.env.NEST_API_PORT || 3000;
+  // configService
+  const configService = app.get(ConfigService);
+  const backendPort = configService.get<number>('NEST_API_PORT', 3000);
+  const frontendPort = configService.get<number>('FRONT_END_PORT');
+  const frontHost = configService.get<string>('FRONT_END_BASE_URL');
+  const backendHost = configService.get<string>('NEST_API_BASE_URL');
+  // baseUrl
+  const backendRootUrl = `http://${backendHost}:${backendPort}`;
+  const frontendRootUrl = `http://${frontHost}:${frontendPort}`;
 
   app.use(cookieParser());
   app.use(express.static(join(__dirname, '..', 'public')));
@@ -23,8 +30,8 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(PORT, () => {
-    console.log(`Server started in port ${PORT}`);
+  await app.listen(backendPort, () => {
+    console.log(`Server started in port ${backendPort}`);
   });
 }
 bootstrap();
