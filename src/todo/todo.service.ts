@@ -30,12 +30,13 @@ export class TodoService {
   }
 
   async getTodos(userId: number, complete: boolean) {
-    let constraint: FindOptionsWhere<Todo> = { user_id: userId };
-    if (typeof complete === 'boolean') {
-      constraint = { ...constraint, isFinished: complete };
+    let condition: FindOptionsWhere<Todo> = { user_id: userId };
+
+    if (complete !== undefined) {
+      condition = { ...condition, isFinished: complete };
     }
     const todoList = await this.todoRepository.find({
-      where: constraint,
+      where: condition,
       relations: { achievement: true, game: true },
     });
     return todoList;
