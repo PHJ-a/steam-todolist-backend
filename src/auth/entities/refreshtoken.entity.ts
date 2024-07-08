@@ -3,9 +3,9 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
   CreateDateColumn,
-  UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 
 @Entity()
@@ -16,15 +16,19 @@ export class RefreshToken {
   @Column('text')
   token: string;
 
-  @ManyToOne(() => User, (user) => user.refreshtokens)
-  user: User;
-
   @CreateDateColumn()
   createdAt: Date;
-
+  
   @Column({ default: false })
   isRevoked: boolean;
-
+  
   @Column({ type: 'timestamp' })
   expires: Date;
+
+  @Column()
+  user_id: number;
+
+  @OneToOne(() => User, (user) => user.refreshtoken)
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  user: User;
 }

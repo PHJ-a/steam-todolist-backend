@@ -1,6 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import * as OpenID from 'openid';
-import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -108,6 +107,7 @@ export class AuthService {
       user: user,
       expires: new Date(Date.now() + this.refreshExpireTime),
     });
+    refreshTokenEntity.user = user;
 
     await this.refreshTokenRepository.save(refreshTokenEntity);
 

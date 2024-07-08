@@ -1,11 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
-import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -14,14 +12,6 @@ export class UserService {
     private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
   ) {}
-
-  // async create(createUserDto: CreateUserDto): Promise<User> {
-  //   const { steamid } = createUserDto
-  //   const userInfo = await this.getUserInfo(steamid);
-  //   const user = this.userRepository.create(userInfo);
-  //   await this.userRepository.save(user);
-  //   return user;
-  // }
 
   async getUserInfo(steamid: string): Promise<User> {
     /** db에 있으면 바로 반환 */
