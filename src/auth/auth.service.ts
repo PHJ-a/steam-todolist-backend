@@ -107,6 +107,7 @@ export class AuthService {
       user: user,
       expires: new Date(Date.now() + this.refreshExpireTime),
     });
+    refreshTokenEntity.user = user;
 
     await this.refreshTokenRepository.save(refreshTokenEntity);
 
