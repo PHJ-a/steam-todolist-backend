@@ -8,6 +8,7 @@ import {
   Entity,
   ManyToMany,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -34,6 +35,6 @@ export class User {
   @OneToMany(() => Todo, (todo) => todo.user)
   todos: Todo[];
 
-  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
-  refreshtokens: RefreshToken[];
+  @OneToOne(() => RefreshToken, (refreshToken) => refreshToken.user)
+  refreshtoken: RefreshToken;
 }

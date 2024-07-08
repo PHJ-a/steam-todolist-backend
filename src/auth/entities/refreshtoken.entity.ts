@@ -3,9 +3,8 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
   CreateDateColumn,
-  UpdateDateColumn,
+  OneToOne,
 } from 'typeorm';
 
 @Entity()
@@ -16,7 +15,7 @@ export class RefreshToken {
   @Column('text')
   token: string;
 
-  @ManyToOne(() => User, (user) => user.refreshtokens)
+  @OneToOne(() => User, (user) => user.refreshtoken)
   user: User;
 
   @CreateDateColumn()
