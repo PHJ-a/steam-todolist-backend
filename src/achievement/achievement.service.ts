@@ -29,6 +29,23 @@ export class AchievementService {
     return result;
   }
 
+  async fetchAchievesAndRate(
+    gameId: number,
+    steamId: string,
+    isInit: boolean = false,
+  ) {
+    if (isInit) {
+      const saved = await this.initSaveAchievement(gameId);
+      await this.updateAchievementCompletionRates(gameId, saved);
+    } else {
+      const achieves = await this.achievementRepository.find({
+        where: { game_id: gameId },
+      });
+      await this.updateAchievementCompletionRates(gameId, achieves);
+    }
+    return await this.getAllAchievementAboutUser(gameId, steamId);
+  }
+
   /** 해당 게임 도전과제 메타 데이터 db에 저장 */
   async initSaveAchievement(gameId: number) {
     const totalAchievements = await this.getAchieveFromSteam(gameId);
@@ -52,9 +69,11 @@ export class AchievementService {
 
   /** db에 저장된 도전과제의 달성률 업데이트 */
   async updateAchievementCompletionRates(
+    gameId: number,
     achieves: Achievement[],
-    curCompleteRate: ICompletedRateFromSteam[],
   ) {
+    const curCompleteRate = await this.getCompleteRateFromSteam(gameId);
+
     const map = new Map<string, ICompletedRateFromSteam>();
     for (const rate of curCompleteRate) {
       map.set(rate.name, rate);
@@ -62,27 +81,25 @@ export class AchievementService {
     /** 업데이트할 도전과제 데이터 청크 */
     const updatedChunk: Achievement[] = [];
     for (const achievement of achieves) {
-      achievement.completed_rate = map.get(achievement.name).percent;
-      updatedChunk.push(achievement);
+      (achievement.completed_rate = map.get(achievement.name).percent),
+        updatedChunk.push(achievement);
     }
     const updated = await this.achievementRepository.save(updatedChunk);
+
     return updated;
   }
 
   /** 유저 데이터 가져와서 각 도전과제 달성 여부 합치기 */
-  async getAllAchievementAboutUser(gameId: number, steamId: string) {
-    const [userStats, allAchievements] = await Promise.all([
-      this.getUserAchievementFromSteam(gameId, steamId),
-      this.achievementRepository.find({
-        where: { game_id: gameId },
-      }),
+  async getAllAchievementAboutUser(gameId: number, steamid: string) {
+    const [userStats, allAchieves] = await Promise.all([
+      this.getUserAchievementFromSteam(gameId, steamid),
+      this.achievementRepository.find({ where: { game_id: gameId } }),
     ]);
-
     const userAchievementsMap = new Map<string, IAchieveUserStat>();
     for (const userStat of userStats) {
       userAchievementsMap.set(userStat.apiname, userStat);
     }
-    const achievements = allAchievements.map((achieve) => ({
+    const achievements = allAchieves.map((achieve) => ({
       id: achieve.id,
       displayName: achieve.displayName,
       description: achieve.description,
