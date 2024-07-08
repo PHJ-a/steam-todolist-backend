@@ -1,14 +1,8 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
-  Query,
-  Req,
   UseGuards,
-  UnauthorizedException,
   NotFoundException,
-  HttpCode,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from 'src/auth/auth.guard';

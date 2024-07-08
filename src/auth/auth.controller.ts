@@ -1,8 +1,6 @@
 import {
   Controller,
   Get,
-  HttpCode,
-  Redirect,
   Req,
   Res,
   UnauthorizedException,

@@ -1,6 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import * as OpenID from 'openid';
-import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
