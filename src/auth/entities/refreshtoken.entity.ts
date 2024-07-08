@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/user/entities/user.entity';
 import {
   Entity,
@@ -10,23 +11,27 @@ import {
 
 @Entity()
 export class RefreshToken {
+  @ApiProperty({ example: 1, description: '리프레시 토큰 ID' })
   @PrimaryGeneratedColumn()
   id: number;
 
+
+  @ApiProperty({ description: '리프레시 토큰 string literal'})
   @Column('text')
   token: string;
 
+  @ApiProperty({ example: Date.now(), description: '리프레시 토큰이 생성된 시간' })
   @CreateDateColumn()
   createdAt: Date;
   
-  @Column({ default: false })
-  isRevoked: boolean;
-  
+  @ApiProperty({ example: Date.now() + 3600000, description: '리프레시 토큰이 만료되는 시간' })
   @Column({ type: 'timestamp' })
   expires: Date;
 
+  @ApiProperty({ example: 1, description: '리프레시 토큰에 연결된 유저의 ID' })
   @Column()
   user_id: number;
+
 
   @OneToOne(() => User, (user) => user.refreshtoken)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
