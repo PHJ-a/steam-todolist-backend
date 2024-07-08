@@ -20,6 +20,7 @@ async function bootstrap() {
   const frontendRootUrl = `http://${frontHost}:${frontendPort}`;
   const config = new DocumentBuilder()
     .setTitle('Steam Todo APi Doc')
+    .setDescription('Steam Todo 백엔드 api 문서')
     .addCookieAuth('access-token')
     .addTag('Steam Todo Api')
     .build();
