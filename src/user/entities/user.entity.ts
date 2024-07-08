@@ -6,6 +6,7 @@ import { Todo } from 'src/todo/entities/todo.entity';
 import {
   Column,
   Entity,
+  JoinColumn,
   ManyToMany,
   OneToMany,
   OneToOne,
@@ -36,5 +37,5 @@ export class User {
   todos: Todo[];
 
   @OneToOne(() => RefreshToken, (refreshToken) => refreshToken.user)
-  refreshtoken: RefreshToken;
+  refreshtoken: RefreshToken | null;
 }
