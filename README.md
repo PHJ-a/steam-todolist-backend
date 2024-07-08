@@ -3,7 +3,7 @@
 
 
 ## ERD
-![스크린샷 2024-07-04 22 30 43](https://github.com/PHJ-a/steam-todolist-backend/assets/156567892/7e66cf06-3683-428a-b1cb-5bdcd61853a6)
+![스크린샷 2024-07-08 11 51 27](https://github.com/PHJ-a/steam-todolist-backend/assets/156567892/10ef3e58-cdbf-4de9-91e1-76c69997a3aa)
 <br/>
 
 ## API 명세
