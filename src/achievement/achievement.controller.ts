@@ -17,10 +17,8 @@ export class AchievementController {
     const { gameId } = param;
 
     const exist = await this.achievementService.checkAchieveExist(gameId);
-    if (!exist) {
-      await this.achievementService.initSaveAchievement(gameId);
-    }
 
+    await this.achievementService.fetchAchievesAndRate(gameId, steamid, !exist);
     const achievements =
       await this.achievementService.getAllAchievementAboutUser(gameId, steamid);
 
