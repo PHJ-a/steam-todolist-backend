@@ -5,6 +5,7 @@ import * as cookieParser from 'cookie-parser';
 import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +18,12 @@ async function bootstrap() {
   // baseUrl
   const backendRootUrl = `http://${backendHost}:${backendPort}`;
   const frontendRootUrl = `http://${frontHost}:${frontendPort}`;
+  const config = new DocumentBuilder()
+    .setTitle('Steam Todo APi Doc')
+    .addCookieAuth('access-token')
+    .addTag('Steam Todo Api')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
 
   app.use(cookieParser());
   app.use(express.static(join(__dirname, '..', 'public')));
@@ -29,6 +36,7 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
+  SwaggerModule.setup('api', app, document);
 
   await app.listen(backendPort, () => {
     console.log(`Server started in port ${backendPort}`);
