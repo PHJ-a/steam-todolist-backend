@@ -26,12 +26,8 @@ export class AuthService {
     this.configService.get<string>('JWT_ACCESS_SECRET');
   private readonly refreshSecret: string =
     this.configService.get<string>('JWT_REFRESH_SECRET');
-  private readonly accessExpireTime: number = parseInt(
-    this.configService.get<string>('ACCESS_EXPIRE_TIME'),
-  );
-  private readonly refreshExpireTime: number = parseInt(
-    this.configService.get<string>('REFRESH_EXPIRE_TIME'),
-  );
+  private readonly accessExpireTime: number = this.configService.get<number>('ACCESS_EXPIRE_TIME');
+  private readonly refreshExpireTime: number = this.configService.get<number>('REFRESH_EXPIRE_TIME');
 
   async getSteamLoginUrl(): Promise<string> {
     return new Promise((resolve, reject) => {
