@@ -102,6 +102,9 @@ export class AuthService {
       secret: this.refreshSecret,
     });
 
+    await this.refreshTokenRepository.delete({
+      user: user
+    });
     const refreshTokenEntity = this.refreshTokenRepository.create({
       token: refreshToken,
       user: user,
@@ -141,7 +144,6 @@ export class AuthService {
     }
 
     const newTokens = await this.generateTokens(existingToken.user);
-    await this.refreshTokenRepository.delete({ token: refreshToken });
 
     return newTokens;
   }
