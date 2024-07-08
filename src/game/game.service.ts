@@ -4,18 +4,21 @@ import axios from 'axios';
 import { Game } from './entities/game.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class GameService {
   constructor(
     @InjectRepository(Game)
     private readonly gameRepository: Repository<Game>,
+    private readonly configService: ConfigService,
   ) {}
 
   /** db와 steam 게임 데이터 동기화 */
   async fetchGames(user: User) {
+    const steamApiKey = this.configService.get<string>('STEAM_API_KEY');
     const { data } = await axios.get(
-      `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${process.env.STEAM_API_KEY}&steamid=${user.steamid}&include_appinfo=1`,
+      `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${steamApiKey}&steamid=${user.steamid}&include_appinfo=1`,
     );
 
     /** 스팀에서 가져온 해당 유저가 보유한 게임 목록 */

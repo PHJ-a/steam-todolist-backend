@@ -7,9 +7,13 @@ import { AchievementModule } from './achievement/achievement.module';
 import { GameModule } from './game/game.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.MYSQL_CONTAINER_NAME,
@@ -19,7 +23,6 @@ import { AuthModule } from './auth/auth.module';
       password: process.env.MYSQL_USER_PASSWORD,
       autoLoadEntities: true,
       synchronize: true,
-      dropSchema: process.env.NODE_ENV === 'development',
     }),
     UserModule,
     TodoModule,

@@ -1,38 +1,40 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import axios from 'axios';
 import { Repository } from 'typeorm';
 import { Achievement } from './entities/achievement.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import {
+  IAchieveUserStat,
+  ICompletedRateFromSteam,
+} from './type/steam.api.type';
+import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class AchievementService {
   constructor(
     @InjectRepository(Achievement)
     private readonly achievementRepository: Repository<Achievement>,
+    private readonly configService: ConfigService,
   ) {}
-
-  async fetchAchievement(gameId: number) {
-    const gameAchievement = await this.achievementRepository.find({
-      where: { game_id: gameId },
+  /** 도전과제 데이터 있는지 확인 */
+  async checkAchieveExist(gmaeId: number) {
+    const exist = await this.achievementRepository.exists({
+      where: { game_id: gmaeId },
     });
-    // 도전과제 이미 db에 있으면 완료율만 업데이트
-    if (gameAchievement.length !== 0) {
-      const update = await this.fetchCompletedRate(gameId);
-      return update;
-    } else {
-      // 없으면 도전과제 저장 & 완료율 업데이트
-      const initSave = await this.initSaveAchievement(gameId);
-      await this.fetchCompletedRate(gameId);
-      return initSave;
-    }
+    return exist;
   }
-  /** 처음 도전과제 전부 저장 */
+
+  /** db에서 id로 도전과제 가져오기 */
+  async getAchievementById(id: number) {
+    const result = await this.achievementRepository.findOne({ where: { id } });
+    return result;
+  }
+
+  /** 해당 게임 도전과제 메타 데이터 db에 저장 */
   async initSaveAchievement(gameId: number) {
-    const totalAchievement = (
-      await axios.get(
-        `http://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?appid=${gameId}&key=${process.env.STEAM_API_KEY}&l=koreana`,
-      )
-    ).data.game.availableGameStats.achievements;
-    for (const achievement of totalAchievement) {
+    const totalAchievements = await this.getAchieveFromSteam(gameId);
+    /** 저장할 도전과제 데이터 청크 */
+    const achieveChunk: Achievement[] = [];
+    for (const achievement of totalAchievements) {
       const newAchievement = new Achievement();
       newAchievement.description = achievement.description;
       newAchievement.displayName = achievement.displayName;
@@ -41,35 +43,33 @@ export class AchievementService {
       newAchievement.icon_gray = achievement.icongray;
       newAchievement.name = achievement.name;
 
-      await this.achievementRepository.save(newAchievement);
+      achieveChunk.push(newAchievement);
     }
-    return { msg: 'init saved' };
+
+    const savedAchieves = await this.achievementRepository.save(achieveChunk);
+    return savedAchieves;
   }
 
-  /** 도전과제 완료율 가져오기 */
-  async fetchCompletedRate(gameId: number) {
-    const showRates = (
-      await axios.get(
-        `http://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid=${gameId}`,
-      )
-    ).data.achievementpercentages.achievements;
-
-    const achievements = await this.achievementRepository.find({
-      where: { game_id: gameId },
-    });
-
-    const map = new Map<string, { name: string; percent: number }>();
-    for (const rate of showRates) {
+  /** db에 저장된 도전과제의 달성률 업데이트 */
+  async updateAchievementCompletionRates(
+    achieves: Achievement[],
+    curCompleteRate: ICompletedRateFromSteam[],
+  ) {
+    const map = new Map<string, ICompletedRateFromSteam>();
+    for (const rate of curCompleteRate) {
       map.set(rate.name, rate);
     }
-    for (const achievement of achievements) {
+    /** 업데이트할 도전과제 데이터 청크 */
+    const updatedChunk: Achievement[] = [];
+    for (const achievement of achieves) {
       achievement.completed_rate = map.get(achievement.name).percent;
-      await this.achievementRepository.save(achievement);
+      updatedChunk.push(achievement);
     }
-    return { msg: 'update rate' };
+    const updated = await this.achievementRepository.save(updatedChunk);
+    return updated;
   }
 
-  /** 도전과제 응답에 필요한 데이터로 변환하기 */
+  /** 유저 데이터 가져와서 각 도전과제 달성 여부 합치기 */
   async getAllAchievementAboutUser(gameId: number, steamId: string) {
     const [userStats, allAchievements] = await Promise.all([
       this.getUserAchievementFromSteam(gameId, steamId),
@@ -78,37 +78,74 @@ export class AchievementService {
       }),
     ]);
 
-    const map = new Map<
-      string,
-      { apiname: string; achieved: number; unlocktime: Date }
-    >();
+    const userAchievementsMap = new Map<string, IAchieveUserStat>();
     for (const userStat of userStats) {
-      map.set(userStat.apiname, userStat);
+      userAchievementsMap.set(userStat.apiname, userStat);
     }
-    const achievements = allAchievements.map((a) => ({
-      id: a.id,
-      displayName: a.displayName,
-      description: a.description,
-      achieved: map.get(a.name).achieved,
-      img: map.get(a.name).achieved === 0 ? a.icon_gray : a.icon,
-      completedRate: a.completed_rate,
+    const achievements = allAchievements.map((achieve) => ({
+      id: achieve.id,
+      displayName: achieve.displayName,
+      description: achieve.description,
+      achieved: userAchievementsMap.get(achieve.name).achieved,
+      img:
+        userAchievementsMap.get(achieve.name).achieved === 0
+          ? achieve.icon_gray
+          : achieve.icon,
+      completedRate: achieve.completed_rate,
     }));
-    return { achievements, gameId };
+    return achievements;
   }
 
+  //---------------------- 스팀 api 요청 -----------------------
+
+  /** 스팀에서 도전과제 데이터 가져오기 */
+  async getAchieveFromSteam(gameId: number) {
+    try {
+      const steamApiKey = this.configService.get<string>('STEAM_API_KEY');
+      const achievements = (
+        await axios.get(
+          `http://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?appid=${gameId}&key=${steamApiKey}&l=koreana`,
+        )
+      ).data.game.availableGameStats.achievements;
+      return achievements;
+    } catch (error) {
+      throw new ServiceUnavailableException(
+        '스팀 도전과제 데이터 api요청 실패',
+      );
+    }
+  }
   /** 스팀에서 유저 도전과제 진행상태 가져오기 */
   async getUserAchievementFromSteam(gameId: number, steamId: string) {
-    const statusUserAchievements = (
-      await axios.get(
-        `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/?appid=${gameId}&key=${process.env.STEAM_API_KEY}&steamid=${steamId}`,
-      )
-    ).data.playerstats.achievements;
+    try {
+      const steamApiKey = this.configService.get<string>('STEAM_API_KEY');
+      const statusUserAchievements = (
+        await axios.get(
+          `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?appid=${gameId}&key=${steamApiKey}&steamid=${steamId}`,
+        )
+      ).data.playerstats.achievements;
 
-    return statusUserAchievements;
+      return statusUserAchievements;
+    } catch {
+      throw new ServiceUnavailableException('스팀 유저 진행상황 api요청 실패');
+    }
   }
-  /** db에서 id로 도전과제 가져오기 */
-  async getAchievementById(id: number) {
-    const result = await this.achievementRepository.findOne({ where: { id } });
-    return result;
+
+  /** 스팀에서 도전과제 달성률 가져오기 */
+  async getCompleteRateFromSteam(
+    gameId: number,
+  ): Promise<ICompletedRateFromSteam[]> {
+    try {
+      const getRates = (
+        await axios.get(
+          `http://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid=${gameId}`,
+        )
+      ).data.achievementpercentages.achievements;
+
+      return getRates;
+    } catch (error) {
+      throw new ServiceUnavailableException(
+        '스팀 도전과제 달성률 api요청 실패',
+      );
+    }
   }
 }
