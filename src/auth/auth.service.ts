@@ -20,17 +20,17 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  private readonly rootUrl: string = `http://${this.configService.get('NEST_API_BASE_URL')}:${this.configService.get('NEST_API_PORT')}`;
+  private readonly rootUrl: string = `http://${this.configService.get<string>('NEST_API_BASE_URL')}:${this.configService.get<string>('NEST_API_PORT')}`;
   private readonly returnUrl: string = `${this.rootUrl}/login/return`;
   private readonly accessSecret: string =
-    this.configService.get('JWT_ACCESS_SECRET');
+    this.configService.get<string>('JWT_ACCESS_SECRET');
   private readonly refreshSecret: string =
-    this.configService.get('JWT_REFRESH_SECRET');
+    this.configService.get<string>('JWT_REFRESH_SECRET');
   private readonly accessExpireTime: number = parseInt(
-    this.configService.get('ACCESS_EXPIRE_TIME'),
+    this.configService.get<string>('ACCESS_EXPIRE_TIME'),
   );
   private readonly refreshExpireTime: number = parseInt(
-    this.configService.get('REFRESH_EXPIRE_TIME'),
+    this.configService.get<string>('REFRESH_EXPIRE_TIME'),
   );
 
   async getSteamLoginUrl(): Promise<string> {
