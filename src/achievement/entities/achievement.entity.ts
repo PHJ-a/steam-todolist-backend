@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Game } from 'src/game/entities/game.entity';
 import { Todo } from 'src/todo/entities/todo.entity';
 import {
@@ -23,6 +24,7 @@ export class Achievement {
   @Column({ default: '' })
   description: string;
 
+  @ApiProperty()
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   completed_rate: number;
 

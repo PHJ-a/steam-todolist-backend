@@ -89,7 +89,6 @@ export class TodoService {
       throw new BadRequestException('없는 todo');
     }
     const removedTodo = await this.todoRepository.delete({ id: id });
-    console.log(removedTodo);
     return removedTodo;
   }
 }

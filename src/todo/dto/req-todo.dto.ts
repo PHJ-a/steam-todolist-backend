@@ -1,7 +1,9 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import { IsBoolean, IsNotEmpty, IsOptional, IsPositive } from 'class-validator';
 
 export class TodoParamDto {
+  @ApiProperty()
   @IsNotEmpty()
   @Type(() => Number)
   @IsPositive()
@@ -10,6 +12,7 @@ export class TodoParamDto {
 }
 
 export class TodoQueryDto {
+  @ApiPropertyOptional()
   @IsOptional()
   @Transform(({ value }) => {
     if (value === 'false') return false;
@@ -21,6 +24,7 @@ export class TodoQueryDto {
 }
 
 export class TodoBodyDto {
+  @ApiProperty()
   @IsNotEmpty()
   @Type(() => Number)
   @IsPositive()
