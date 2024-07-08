@@ -1,12 +1,10 @@
 import { Expose } from 'class-transformer';
-import { Achievement } from 'src/achievement/entities/achievement.entity';
 import { RefreshToken } from 'src/auth/entities/refreshtoken.entity';
 import { Game } from 'src/game/entities/game.entity';
 import { Todo } from 'src/todo/entities/todo.entity';
 import {
   Column,
   Entity,
-  JoinColumn,
   ManyToMany,
   OneToMany,
   OneToOne,
@@ -37,5 +35,5 @@ export class User {
   todos: Todo[];
 
   @OneToOne(() => RefreshToken, (refreshToken) => refreshToken.user)
-  refreshtoken: RefreshToken | null;
+  refreshtoken: RefreshToken;
 }
