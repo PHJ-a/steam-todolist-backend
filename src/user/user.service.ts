@@ -27,7 +27,7 @@ export class UserService {
   }
 
   private async getUserInfoFromSteam(steamid: string): Promise<User> {
-    const steamApiKey = this.configService.get('STEAM_API_KEY');
+    const steamApiKey = this.configService.get<string>('STEAM_API_KEY');
     const url = `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${steamApiKey}&steamids=${steamid}`;
     const response = await axios.get(url);
     if (response.data.response.players.length === 0) {
