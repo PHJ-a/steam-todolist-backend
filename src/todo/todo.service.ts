@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { Todo } from './entities/todo.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,21 +17,26 @@ export class TodoService {
     private readonly todoRepository: Repository<Todo>,
     private readonly achievementService: AchievementService,
   ) {}
-  async create(achievementId, userId: number) {
+  async create(achievementId: number, userId: number) {
     const exist = await this.todoRepository.findOne({
       where: { achievement_id: achievementId, user_id: userId },
     });
     if (exist) {
       throw new BadRequestException('이미 todo를 진행중');
     }
-    const queryAchievement =
-      await this.achievementService.getAchievementById(achievementId);
-    const obj = this.todoRepository.create({
-      user_id: userId,
-      achievement_id: achievementId,
-      game_id: queryAchievement.game_id,
-    });
-    return await this.todoRepository.save(obj);
+
+    try {
+      const queryAchievement =
+        await this.achievementService.getAchievementById(achievementId);
+      const obj = this.todoRepository.create({
+        user_id: userId,
+        achievement_id: achievementId,
+        game_id: queryAchievement.game_id,
+      });
+      return await this.todoRepository.save(obj);
+    } catch (error) {
+      throw new InternalServerErrorException('Todo 생성 실패');
+    }
   }
 
   async getTodos(userId: number, complete: boolean) {
@@ -47,6 +57,9 @@ export class TodoService {
       where: { id: id },
       relations: { achievement: true, game: true },
     });
+    if (!todo) {
+      throw new NotFoundException('Todo가 존재하지 않습니다.');
+    }
     return todo;
   }
 
@@ -56,7 +69,7 @@ export class TodoService {
       relations: { achievement: true },
     });
     if (!todo) {
-      throw new BadRequestException('없는 todo');
+      throw new NotFoundException('없는 todo');
     }
     // db 도전과제 , 유저의 도전과제 상태 가져오기
     const [achievement, fetchingAchieve] = await Promise.all([
@@ -66,30 +79,37 @@ export class TodoService {
         user.steamid,
       ),
     ]);
-    const newFetchingData = fetchingAchieve.filter(
-      (data) => data.apiname === achievement.name,
-    )[0];
-    // 실제로 도전과제가 완료되지 않은 경우
-    if (newFetchingData.achieved === 0) {
-      return null;
-    } else {
-      // 실제로 완료됐으면 db에도 업데이트
-      const updatedTodo = await this.todoRepository.save({
-        ...todo,
-        end: new Date(newFetchingData.unlocktime * 1000),
-        isFinished: true,
-      });
-      return updatedTodo;
+    try {
+      const newFetchingData = fetchingAchieve.filter(
+        (data) => data.apiname === achievement.name,
+      )[0];
+      // 실제로 도전과제가 완료되지 않은 경우
+      if (newFetchingData.achieved === 0) {
+        return null;
+      } else {
+        // 실제로 완료됐으면 db에도 업데이트
+        const updatedTodo = await this.todoRepository.save({
+          ...todo,
+          end: new Date(newFetchingData.unlocktime * 1000),
+          isFinished: true,
+        });
+        return updatedTodo;
+      }
+    } catch (error) {
+      throw new InternalServerErrorException('Todo 완료 처리 실패');
     }
   }
 
   async remove(id: number) {
-    const todo = await this.todoRepository.findOne({ where: { id: id } });
+    const todo = await this.todoRepository.findOne({ where: { id } });
     if (!todo) {
-      throw new BadRequestException('없는 todo');
+      throw new NotFoundException('없는 todo');
     }
-    const removedTodo = await this.todoRepository.delete({ id: id });
-    console.log(removedTodo);
-    return removedTodo;
+    try {
+      await this.todoRepository.delete({ id });
+      return { id: todo.id };
+    } catch (error) {
+      throw new InternalServerErrorException('DB 삭제 실패');
+    }
   }
 }

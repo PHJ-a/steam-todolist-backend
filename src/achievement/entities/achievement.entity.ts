@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Game } from 'src/game/entities/game.entity';
 import { Todo } from 'src/todo/entities/todo.entity';
 import {

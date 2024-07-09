@@ -1,4 +1,9 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import axios from 'axios';
 import { Repository } from 'typeorm';
 import { Achievement } from './entities/achievement.entity';
@@ -26,6 +31,9 @@ export class AchievementService {
   /** db에서 id로 도전과제 가져오기 */
   async getAchievementById(id: number) {
     const result = await this.achievementRepository.findOne({ where: { id } });
+    if (!result) {
+      throw new NotFoundException('해당 도전과제는 존재하지 않습니다.');
+    }
     return result;
   }
 
@@ -63,8 +71,12 @@ export class AchievementService {
       achieveChunk.push(newAchievement);
     }
 
-    const savedAchieves = await this.achievementRepository.save(achieveChunk);
-    return savedAchieves;
+    try {
+      const savedAchieves = await this.achievementRepository.save(achieveChunk);
+      return savedAchieves;
+    } catch (error) {
+      throw new InternalServerErrorException('도전과제 저장 실패F');
+    }
   }
 
   /** db에 저장된 도전과제의 달성률 업데이트 */
@@ -84,9 +96,16 @@ export class AchievementService {
       (achievement.completed_rate = map.get(achievement.name).percent),
         updatedChunk.push(achievement);
     }
-    const updated = await this.achievementRepository.save(updatedChunk);
 
-    return updated;
+    try {
+      const updated = await this.achievementRepository.save(updatedChunk);
+      return updated;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        '달성률 업데이트 데이터 저장 실패',
+      );
+    }
+
   }
 
   /** 유저 데이터 가져와서 각 도전과제 달성 여부 합치기 */
@@ -95,6 +114,12 @@ export class AchievementService {
       this.getUserAchievementFromSteam(gameId, steamid),
       this.achievementRepository.find({ where: { game_id: gameId } }),
     ]);
+
+    if (allAchievements.length === 0) {
+      throw new NotFoundException(
+        '해당 게임에 대한 도전과제 데이터가 없습니다.',
+      );
+    }
     const userAchievementsMap = new Map<string, IAchieveUserStat>();
     for (const userStat of userStats) {
       userAchievementsMap.set(userStat.apiname, userStat);
@@ -113,7 +138,7 @@ export class AchievementService {
     return achievements;
   }
 
-  //---------------------- 스팀 api 요청 -----------------------
+  //---------------------- Steam api -----------------------
 
   /** 스팀에서 도전과제 데이터 가져오기 */
   async getAchieveFromSteam(gameId: number) {

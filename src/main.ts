@@ -22,7 +22,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Steam Todo APi Doc')
     .setDescription('Steam Todo 백엔드 api 문서')
-    .addCookieAuth('access-token')
+    .addCookieAuth('jwt')
     .addTag('Steam Todo Api')
     .build();
   const document = SwaggerModule.createDocument(app, config);
