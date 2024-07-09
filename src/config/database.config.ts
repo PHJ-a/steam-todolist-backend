@@ -11,5 +11,5 @@ export const getDatabaseConfig = (
   username: configService.get<string>('MYSQL_USER'),
   password: configService.get<string>('MYSQL_USER_PASSWORD'),
   autoLoadEntities: true,
-  synchronize: true,
+  synchronize: false,
 });
