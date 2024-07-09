@@ -12,6 +12,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   // configService
   const configService = app.get(ConfigService);
+  const backendPort = configService.get<number>('NEST_API_PORT', 3000);
   const frontendPort = configService.get<number>('FRONT_END_PORT');
   const frontHost = configService.get<string>('FRONT_END_BASE_URL');
   // baseUrl
