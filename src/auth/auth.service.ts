@@ -91,7 +91,9 @@ export class AuthService {
   }
 
   private async generateTokens(user: User) {
-    const payload = instanceToPlain(user);
+    const payload = instanceToPlain(user, {
+      excludeExtraneousValues: true,
+    });
     const accessToken = this.jwtService.sign(payload, {
       expiresIn: this.accessExpireTime,
       secret: this.accessSecret,
