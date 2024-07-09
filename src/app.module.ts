@@ -6,22 +6,18 @@ import { AchievementModule } from './achievement/achievement.module';
 import { GameModule } from './game/game.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { getDatabaseConfig } from './config/database.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.MYSQL_CONTAINER_NAME,
-      port: parseInt(process.env.MYSQL_TCP_PORT),
-      database: process.env.MYSQL_DATABASE,
-      username: process.env.MYSQL_USER,
-      password: process.env.MYSQL_USER_PASSWORD,
-      autoLoadEntities: true,
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => getDatabaseConfig(configService),
+      inject: [ConfigService],
     }),
     UserModule,
     TodoModule,

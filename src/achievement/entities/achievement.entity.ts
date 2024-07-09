@@ -24,8 +24,7 @@ export class Achievement {
   @Column({ default: '' })
   description: string;
 
-  @ApiProperty()
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  @Column({ type: 'decimal', precision: 5, scale: 2, default: 0 })
   completed_rate: number;
 
   @Column()
