@@ -4,5 +4,5 @@ test
 .gitignore
 .git
 .prettierrc
-Dockerfile
+# Dockerfile
 README.md

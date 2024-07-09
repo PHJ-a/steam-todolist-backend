@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getDatabaseConfig } from './config/database.config';
 import { GameModule } from './modules/game.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -27,5 +28,6 @@ import { GameModule } from './modules/game.module';
     AuthModule,
   ],
   providers: [AppService],
+  controllers: [AppController],
 })
 export class AppModule {}
