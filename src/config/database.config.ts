@@ -6,7 +6,7 @@ export const getDatabaseConfig = (
 ): TypeOrmModuleOptions => ({
   type: 'mysql',
   host: configService.get<string>('MYSQL_CONTAINER_NAME'),
-  port: configService.get<number>('MYSQL_TCP_PORT'),
+  port: 3306,
   database: configService.get<string>('MYSQL_DATABASE'),
   username: configService.get<string>('MYSQL_USER'),
   password: configService.get<string>('MYSQL_USER_PASSWORD'),
