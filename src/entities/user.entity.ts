@@ -16,6 +16,7 @@ import { RefreshToken } from './refreshtoken.entity';
 export class User {
   @ApiProperty({ example: 1, description: '사용자의 ID' })
   @PrimaryGeneratedColumn()
+  @Expose()
   id: number;
 
   @ApiProperty({
