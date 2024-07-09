@@ -6,7 +6,7 @@ import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { HttpExceptionFilter } from './common/http-exception.filter';
+import { HttpExceptionFilter } from './filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

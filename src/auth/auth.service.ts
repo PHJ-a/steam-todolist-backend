@@ -3,12 +3,12 @@ import * as OpenID from 'openid';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RefreshToken } from './entities/refreshtoken.entity';
+import { RefreshToken } from '../entities/refreshtoken.entity';
 import { Repository } from 'typeorm';
-import { User } from 'src/user/entities/user.entity';
 import { Response } from 'express';
 import { instanceToPlain } from 'class-transformer';
-import { UserService } from 'src/user/user.service';
+import { UserService } from 'src/services/user.service';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -26,8 +26,11 @@ export class AuthService {
     this.configService.get<string>('JWT_ACCESS_SECRET');
   private readonly refreshSecret: string =
     this.configService.get<string>('JWT_REFRESH_SECRET');
-  private readonly accessExpireTime: number = +this.configService.get<number>('ACCESS_EXPIRE_TIME');
-  private readonly refreshExpireTime: number = +this.configService.get<number>('REFRESH_EXPIRE_TIME');
+  private readonly accessExpireTime: number =
+    +this.configService.get<number>('ACCESS_EXPIRE_TIME');
+  private readonly refreshExpireTime: number = +this.configService.get<number>(
+    'REFRESH_EXPIRE_TIME',
+  );
 
   async getSteamLoginUrl(): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -75,7 +78,7 @@ export class AuthService {
         } else {
           const steamid = result.claimedIdentifier.split('/').pop();
           try {
-            let user: User = await this.userService.getUserInfo(steamid);
+            const user: User = await this.userService.getUserInfo(steamid);
             // Generate tokens
             const tokens = await this.generateTokens(user);
             resolve(tokens);
@@ -99,7 +102,7 @@ export class AuthService {
     });
 
     await this.refreshTokenRepository.delete({
-      user: user
+      user: user,
     });
     const refreshTokenEntity = this.refreshTokenRepository.create({
       token: refreshToken,

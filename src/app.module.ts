@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AppService } from './app.service';
-import { UserModule } from './user/user.module';
-import { TodoModule } from './todo/todo.module';
-import { AchievementModule } from './achievement/achievement.module';
-import { GameModule } from './game/game.module';
+import { UserModule } from './modules/user.module';
+import { TodoModule } from './modules/todo.module';
+import { AchievementModule } from './modules/achievement.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getDatabaseConfig } from './config/database.config';
+import { GameModule } from './modules/game.module';
 
 @Module({
   imports: [
@@ -16,7 +16,8 @@ import { getDatabaseConfig } from './config/database.config';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => getDatabaseConfig(configService),
+      useFactory: (configService: ConfigService) =>
+        getDatabaseConfig(configService),
       inject: [ConfigService],
     }),
     UserModule,
