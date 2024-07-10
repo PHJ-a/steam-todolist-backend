@@ -1,7 +1,7 @@
 version: '3'
 services:
   nestjs_api:
-    image: evanskj/steam_todo:0.0.4
+    image: evanskj/steam_todo:latest
     platform: linux/amd64
     ports:
       - '80:3000'
