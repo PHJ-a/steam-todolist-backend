@@ -124,17 +124,22 @@ export class AchievementService {
     for (const userStat of userStats) {
       userAchievementsMap.set(userStat.apiname, userStat);
     }
-    const achievements = allAchieves.map((achieve) => ({
-      id: achieve.id,
-      displayName: achieve.displayName,
-      description: achieve.description,
-      achieved: userAchievementsMap.get(achieve.name).achieved,
-      img:
-        userAchievementsMap.get(achieve.name).achieved === 0
-          ? achieve.icon_gray
-          : achieve.icon,
-      completedRate: achieve.completed_rate,
-    }));
+    const achievements = allAchieves.map((achieve) => {
+      const unlocktime =
+        userAchievementsMap.get(achieve.name).unlocktime * 1000;
+      return {
+        id: achieve.id,
+        displayName: achieve.displayName,
+        description: achieve.description,
+        achieved: userAchievementsMap.get(achieve.name).achieved,
+        unlocktime: unlocktime === 0 ? null : new Date(unlocktime),
+        img:
+          userAchievementsMap.get(achieve.name).achieved === 0
+            ? achieve.icon_gray
+            : achieve.icon,
+        completedRate: achieve.completed_rate,
+      };
+    });
     return achievements;
   }
 
@@ -149,6 +154,7 @@ export class AchievementService {
           `http://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?appid=${gameId}&key=${steamApiKey}&l=koreana`,
         )
       ).data.game.availableGameStats.achievements;
+      console.log(steamApiKey);
       return achievements;
     } catch (error) {
       throw new ServiceUnavailableException(
@@ -165,6 +171,8 @@ export class AchievementService {
           `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?appid=${gameId}&key=${steamApiKey}&steamid=${steamId}`,
         )
       ).data.playerstats.achievements;
+
+      console.log(statusUserAchievements);
 
       return statusUserAchievements;
     } catch {

@@ -20,8 +20,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  private readonly rootUrl: string = `http://${this.configService.get<string>('NEST_API_BASE_URL')}:${this.configService.get<string>('NEST_API_PORT')}`;
-  private readonly returnUrl: string = `${this.rootUrl}/login/return`;
+  private readonly rootUrl: string = `http://${this.configService.get<string>('NEST_API_BASE_URL')}`;
+  private readonly returnUrl: string = `${this.rootUrl}:80/login/return`;
   private readonly accessSecret: string =
     this.configService.get<string>('JWT_ACCESS_SECRET');
   private readonly refreshSecret: string =

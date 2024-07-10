@@ -13,9 +13,14 @@ async function bootstrap() {
   // configService
   const configService = app.get(ConfigService);
   const backendPort = configService.get<number>('NEST_API_PORT', 3000);
-  const frontendPort = configService.get<number>('FRONT_END_PORT');
-  const frontHost = configService.get<string>('FRONT_END_BASE_URL');
+  const backendHost = configService.get<string>('NEST_API_BASE_URL');
+  const frontendPort = configService.get<number>('FRONT_END_PORT', 5173);
+  const frontHost = configService.get<string>(
+    'FRONT_END_BASE_URL',
+    'localhost',
+  );
   // baseUrl
+  const backendRootUrl = `http://${backendHost}`;
   const frontendRootUrl = `http://${frontHost}:${frontendPort}`;
   const config = new DocumentBuilder()
     .setTitle('Steam Todo APi Doc')
@@ -28,7 +33,7 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(express.static(join(__dirname, '..', 'public')));
   app.enableCors({
-    origin: [frontendRootUrl],
+    origin: [frontendRootUrl, backendRootUrl],
     credentials: true,
   });
   app.useGlobalPipes(
