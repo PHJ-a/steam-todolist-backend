@@ -20,8 +20,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  private readonly rootUrl: string = `http://${this.configService.get<string>('NEST_API_BASE_URL')}:${this.configService.get<string>('NEST_API_PORT')}`;
-  private readonly returnUrl: string = `${this.rootUrl}/login/return`;
+  private readonly rootUrl: string = `http://${this.configService.get<string>('NEST_API_BASE_URL')}`;
+  private readonly returnUrl: string = `${this.rootUrl}:80/login/return`;
   private readonly accessSecret: string =
     this.configService.get<string>('JWT_ACCESS_SECRET');
   private readonly refreshSecret: string =
@@ -155,17 +155,19 @@ export class AuthService {
     refreshToken: string,
   ): void {
     res.cookie('jwt', accessToken, {
+      sameSite: 'none',
       httpOnly: true,
       maxAge: this.accessExpireTime,
     });
 
     res.cookie('refreshToken', refreshToken, {
+      sameSite: 'none',
       httpOnly: true,
       maxAge: this.refreshExpireTime,
     });
 
-    res.cookie('isLoggedin', 'true', {
-      secure: true,
+    res.cookie('isLoggedIn', 'true', {
+      sameSite: 'none',
       maxAge: this.accessExpireTime,
     });
   }

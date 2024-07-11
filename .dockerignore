@@ -1,8 +1,11 @@
 node_modules
+mysql_data
 dist
+.env*
 test
 .gitignore
 .git
 .prettierrc
-# Dockerfile
+Dockerfile*
+docker-compose*
 README.md

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseFilters, UseGuards } from '@nestjs/common';
 import { AchievementService } from '../services/achievement.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { FetchAchieveDto } from '../dtos/req-achieve.dto';

@@ -111,7 +111,7 @@ export class GameService {
   }
   //-------------------- Steam api -----------------
 
-  async getUserGamesFromSteam(steamid) {
+  async getUserGamesFromSteam(steamid: string) {
     try {
       const steamApiKey = this.configService.get<string>('STEAM_API_KEY');
       const { data } = await axios.get(

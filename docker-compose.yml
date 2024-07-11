@@ -1,26 +1,21 @@
-version: '3.8'
+version: '3'
 services:
   nestjs_api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    env_file:
-      - ./.env
+    image: evanskj/steam_todo:latest
+    platform: linux/amd64
     ports:
-      - '${NEST_API_PORT}:${NEST_API_PORT}'
-    volumes:
-      - ./src:/usr/src/app/src
-  mysql:
-    container_name: ${MYSQL_CONTAINER_NAME}
-    image: mysql
-    restart: always
-    ports:
-      - '${MYSQL_TCP_PORT}:${MYSQL_TCP_PORT}'
+      - '80:3000'
     environment:
+      - NODE_ENV=${NODE_ENV}
+      - MYSQL_CONTAINER_NAME=${MYSQL_CONTAINER_NAME}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_USER_PASSWORD}
-      - MYSQL_TCP_PORT=${MYSQL_TCP_PORT}
-    volumes:
-      - ./mysql_data:/var/lib/mysql
+      - MYSQL_USER_PASSWORD=${MYSQL_USER_PASSWORD}
+      - STEAM_API_KEY=${STEAM_API_KEY}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - ACCESS_EXPIRE_TIME=${ACCESS_EXPIRE_TIME}
+      - REFRESH_EXPIRE_TIME=${REFRESH_EXPIRE_TIME}
+      - NEST_API_BASE_URL=${NEST_API_BASE_URL}
+      - FRONT_END_PORT=${FRONT_END_PORT}
+      - FRONT_END_BASE_URL=${FRONT_END_BASE_URL}

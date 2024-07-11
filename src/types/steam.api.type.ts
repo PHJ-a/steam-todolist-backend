@@ -6,5 +6,5 @@ export interface ICompletedRateFromSteam {
 export interface IAchieveUserStat {
   apiname: string;
   achieved: number;
-  unlocktime: Date;
+  unlocktime: number;
 }
