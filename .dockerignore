@@ -4,6 +4,7 @@ dist
 .env*
 test
 .gitignore
+.github
 .git
 .prettierrc
 Dockerfile*
