@@ -154,7 +154,6 @@ export class AchievementService {
           `http://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?appid=${gameId}&key=${steamApiKey}&l=koreana`,
         )
       ).data.game.availableGameStats.achievements;
-      console.log(steamApiKey);
       return achievements;
     } catch (error) {
       throw new ServiceUnavailableException(
@@ -171,8 +170,6 @@ export class AchievementService {
           `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?appid=${gameId}&key=${steamApiKey}&steamid=${steamId}`,
         )
       ).data.playerstats.achievements;
-
-      console.log(statusUserAchievements);
 
       return statusUserAchievements;
     } catch {

@@ -155,17 +155,19 @@ export class AuthService {
     refreshToken: string,
   ): void {
     res.cookie('jwt', accessToken, {
+      sameSite: 'none',
       httpOnly: true,
       maxAge: this.accessExpireTime,
     });
 
     res.cookie('refreshToken', refreshToken, {
+      sameSite: 'none',
       httpOnly: true,
       maxAge: this.refreshExpireTime,
     });
 
-    res.cookie('isLoggedin', 'true', {
-      secure: true,
+    res.cookie('isLoggedIn', 'true', {
+      sameSite: 'none',
       maxAge: this.accessExpireTime,
     });
   }
