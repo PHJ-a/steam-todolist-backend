@@ -18,6 +18,9 @@ export class ResAchieveWithUserDto {
 
   @ApiProperty({ example: '12.13' })
   completedRate: number;
+
+  @ApiProperty()
+  unlockTime: Date | null;
 }
 
 export class AchieveFetchingDto {
