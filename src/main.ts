@@ -12,16 +12,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   // configService
   const configService = app.get(ConfigService);
-  const backendPort = configService.get<number>('NEST_API_PORT', 3000);
-  const backendHost = configService.get<string>('NEST_API_BASE_URL');
-  const frontendPort = configService.get<number>('FRONT_END_PORT', 443);
-  const frontHost = configService.get<string>(
-    'FRONT_END_BASE_URL',
-    'localhost',
-  );
   // baseUrl
-  const backendRootUrl = `https://${backendHost}`;
-  const frontendRootUrl = `https://${frontHost}`;
+  const backendRootUrl = configService.get<string>('BACK_END_URL');
+  const frontendRootUrl = configService.get<string>('FRONT_END_URL');
   const config = new DocumentBuilder()
     .setTitle('Steam Todo APi Doc')
     .setDescription('Steam Todo 백엔드 api 문서')
@@ -44,8 +37,8 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(backendPort, () => {
-    console.log(`Server started in port ${backendPort}`);
+  await app.listen(3000, () => {
+    console.log(`Server started.`);
   });
 }
 bootstrap();

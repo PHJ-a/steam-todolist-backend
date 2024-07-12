@@ -5,7 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RefreshToken } from '../entities/refreshtoken.entity';
 import { Repository } from 'typeorm';
-import { Response } from 'express';
+import { CookieOptions, Response } from 'express';
 import { instanceToPlain } from 'class-transformer';
 import { UserService } from 'src/services/user.service';
 import { User } from 'src/entities/user.entity';
@@ -20,7 +20,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  private readonly rootUrl: string = `https://${this.configService.get<string>('NEST_API_BASE_URL')}`;
+  private readonly rootUrl = this.configService.get<string>('BACK_END_URL');
   private readonly returnUrl: string = `${this.rootUrl}/login/return`;
   private readonly accessSecret: string =
     this.configService.get<string>('JWT_ACCESS_SECRET');
@@ -31,6 +31,7 @@ export class AuthService {
   private readonly refreshExpireTime: number = +this.configService.get<number>(
     'REFRESH_EXPIRE_TIME',
   );
+  private readonly nodeEnv = this.configService.get<string>('NODE_ENV');
 
   async getSteamLoginUrl(): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -137,46 +138,42 @@ export class AuthService {
     return newTokens;
   }
 
+  private getBaseCookieOption(httpOnly: boolean): CookieOptions {
+    if (this.nodeEnv === 'production') {
+      return {
+        secure: true,
+        domain: '.steam-todo.gjeodnd12165.site',
+        httpOnly,
+      }
+    } else {
+      return {
+        httpOnly,
+      }
+    }
+  }
+
   responseWithTokens(
     res: Response,
     accessToken: string,
     refreshToken: string,
   ): void {
     res.cookie('jwt', accessToken, {
-      secure: true,
-      httpOnly: true,
+      ...this.getBaseCookieOption(true),
       maxAge: this.accessExpireTime,
-      domain: '.steam-todo.gjeodnd12165.site',
     });
-
     res.cookie('refreshToken', refreshToken, {
-      secure: true,
-      httpOnly: true,
+      ...this.getBaseCookieOption(true),
       maxAge: this.refreshExpireTime,
-      domain: '.steam-todo.gjeodnd12165.site',
     });
-
     res.cookie('isLoggedIn', 'true', {
-      secure: true,
+      ...this.getBaseCookieOption(false),
       maxAge: this.accessExpireTime,
-      domain: '.steam-todo.gjeodnd12165.site',
     });
   }
 
   clearAllCookies(res: Response): void {
-    res.clearCookie('jwt', {
-      secure: true,
-      sameSite: 'none',
-      httpOnly: true,
-    });
-    res.clearCookie('refreshToken', {
-      secure: true,
-      sameSite: 'none',
-      httpOnly: true,
-    });
-    res.clearCookie('isLoggedIn', {
-      secure: true,
-      sameSite: 'none',
-    });
+    res.clearCookie('jwt', this.getBaseCookieOption(true));
+    res.clearCookie('refreshToken', this.getBaseCookieOption(true));
+    res.clearCookie('isLoggedIn', this.getBaseCookieOption(false));
   }
 }
