@@ -17,7 +17,7 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {}
 
-  private readonly returnUrl = `http://${this.configService.get<string>('NEST_API_BASE_URL')}:${this.configService.get<string>('NEST_API_PORT')}`;
+  private readonly returnUrl = `https://${this.configService.get<string>('NEST_API_BASE_URL')}:${this.configService.get<string>('NEST_API_PORT')}`;
 
   @Get('login')
   @ApiResponse({

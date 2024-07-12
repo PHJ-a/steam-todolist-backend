@@ -20,8 +20,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  private readonly rootUrl: string = `http://${this.configService.get<string>('NEST_API_BASE_URL')}`;
-  private readonly returnUrl: string = `${this.rootUrl}:80/login/return`;
+  private readonly rootUrl: string = `https://${this.configService.get<string>('NEST_API_BASE_URL')}`;
+  private readonly returnUrl: string = `${this.rootUrl}/login/return`;
   private readonly accessSecret: string =
     this.configService.get<string>('JWT_ACCESS_SECRET');
   private readonly refreshSecret: string =
@@ -103,18 +103,6 @@ export class AuthService {
       secret: this.refreshSecret,
     });
 
-    await this.refreshTokenRepository.delete({
-      user: user,
-    });
-    const refreshTokenEntity = this.refreshTokenRepository.create({
-      token: refreshToken,
-      user: user,
-      expires: new Date(Date.now() + this.refreshExpireTime),
-    });
-    refreshTokenEntity.user = user;
-
-    await this.refreshTokenRepository.save(refreshTokenEntity);
-
     return { accessToken, refreshToken };
   }
 
@@ -155,18 +143,21 @@ export class AuthService {
     refreshToken: string,
   ): void {
     res.cookie('jwt', accessToken, {
+      secure: true,
       sameSite: 'none',
       httpOnly: true,
       maxAge: this.accessExpireTime,
     });
 
     res.cookie('refreshToken', refreshToken, {
+      secure: true,
       sameSite: 'none',
       httpOnly: true,
       maxAge: this.refreshExpireTime,
     });
 
     res.cookie('isLoggedIn', 'true', {
+      secure: true,
       sameSite: 'none',
       maxAge: this.accessExpireTime,
     });
@@ -174,13 +165,18 @@ export class AuthService {
 
   clearAllCookies(res: Response): void {
     res.clearCookie('jwt', {
+      secure: true,
+      sameSite: 'none',
       httpOnly: true,
     });
     res.clearCookie('refreshToken', {
+      secure: true,
+      sameSite: 'none',
       httpOnly: true,
     });
-    res.clearCookie('isLoggedin', {
+    res.clearCookie('isLoggedIn', {
       secure: true,
+      sameSite: 'none',
     });
   }
 }
