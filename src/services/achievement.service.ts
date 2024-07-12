@@ -149,11 +149,10 @@ export class AchievementService {
   async getAchieveFromSteam(gameId: number) {
     try {
       const steamApiKey = this.configService.get<string>('STEAM_API_KEY');
-      const achievements = (
-        await axios.get(
-          `http://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?appid=${gameId}&key=${steamApiKey}&l=koreana`,
-        )
-      ).data.game.availableGameStats.achievements;
+      const steamRes = await axios.get(
+        `http://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?appid=${gameId}&key=${steamApiKey}&l=koreana`,
+      );
+      const achievements = steamRes.data.game.availableGameStats.achievements;
       return achievements;
     } catch (error) {
       throw new ServiceUnavailableException(

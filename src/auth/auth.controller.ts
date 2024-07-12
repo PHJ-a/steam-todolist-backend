@@ -18,7 +18,8 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {}
 
-  private readonly frontendUrl = this.configService.get<string>('FRONT_END_URL');
+  private readonly frontendUrl =
+    this.configService.get<string>('FRONT_END_URL');
   @Get('login')
   @ApiResponse({
     status: 302,

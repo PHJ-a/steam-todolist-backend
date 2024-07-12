@@ -13,6 +13,9 @@ export class Game {
   @Column()
   name: string;
 
+  @Column({ default: null })
+  lastUpdate: Date | null;
+
   @OneToMany(() => Achievement, (achievement) => achievement.game)
   achievement: Achievement[];
 
