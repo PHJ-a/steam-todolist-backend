@@ -24,9 +24,7 @@ export class GameService {
     const gamesFromSteam = await this.getUserGamesFromSteam(user.steamid);
 
     /** db에 저장된 게임 목록 */
-    const dbGames = await this.gameRepository.find({
-      relations: { users: true },
-    });
+    const dbGames = await this.gameRepository.find({});
 
     // db에 저장된 게임 없는 경우
     if (dbGames.length === 0) {
@@ -35,7 +33,6 @@ export class GameService {
         const newGame = new Game();
         newGame.appid = gameFromSteam.appid;
         newGame.name = gameFromSteam.name;
-        newGame.users = [user];
         willSaved.push(newGame);
       }
       try {
@@ -53,53 +50,40 @@ export class GameService {
       /** db에 없는 게임 */
       const notExistDbGames: Game[] = [];
 
-      /** db에 있는 게임 유저 업데이트*/
-      const updateDbGames: Game[] = [];
+      // /** db에 있는 게임 유저 업데이트*/
+      // const updateDbGames: Game[] = [];
 
       for (const gameFromSteam of gamesFromSteam) {
-        const dbGame = dbGameMap.get(gameFromSteam.appid);
-        if (dbGame) {
-          // 유저가 db에 저장된 게임을 새로 산 경우 게임과 유저 연결
-          if (
-            !dbGame.users.some(
-              (alreadyUser) => alreadyUser.steamid === user.steamid,
-            )
-          ) {
-            dbGame.users.push(user);
-            updateDbGames.push(dbGame);
-          }
-        } else {
-          // db에 게임이 존재하지 않는 경우
-          const newGames = new Game();
-          newGames.appid = gameFromSteam.appid;
-          newGames.name = gameFromSteam.name;
-          newGames.users = [user];
-          notExistDbGames.push(newGames);
+        const dbGame: Game = dbGameMap.get(gameFromSteam.appid);
+
+        // db에 게임이 존재하지 않는 경우
+        if (!dbGame) {
+          const newGame = this.gameRepository.create({
+            appid: gameFromSteam.appid,
+            name: gameFromSteam.name,
+          }) as Game;
+          notExistDbGames.push(newGame);
         }
       }
 
       try {
         if (notExistDbGames.length > 0) {
           await this.gameRepository.save(notExistDbGames);
+          return { msg: '새로운 게임 업데이트' };
+        } else {
+          return { msg: '저장할 필요 없음' };
         }
-        if (updateDbGames.length > 0) {
-          await this.gameRepository.save(updateDbGames);
-        }
-
-        return true;
       } catch (error) {
         throw new InternalServerErrorException('DB에 게임 업데이트 실패');
       }
     }
   }
 
-  async findOwnedGame(steamid: string) {
-    const ownedGame = await this.gameRepository.find({
-      where: { users: { steamid } },
-    });
+  // async findOwnedGame(steamid: string) {
+  //   const ownedGame = await this.gameRepository.find({});
 
-    return ownedGame;
-  }
+  //   return ownedGame;
+  // }
   async findGameById(gameId: number) {
     const game = await this.gameRepository.findOne({
       where: { appid: gameId },
