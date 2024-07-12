@@ -3,12 +3,10 @@ import { Expose } from 'class-transformer';
 import {
   Column,
   Entity,
-  ManyToMany,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Game } from './game.entity';
 import { Todo } from './todo.entity';
 import { RefreshToken } from './refreshtoken.entity';
 
@@ -40,9 +38,6 @@ export class User {
   @Column()
   @Expose()
   avatarfull: string;
-
-  @ManyToMany(() => Game, (game) => game.users)
-  games: Game[];
 
   @OneToMany(() => Todo, (todo) => todo.user)
   todos: Todo[];

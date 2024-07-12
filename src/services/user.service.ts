@@ -43,7 +43,6 @@ export class UserService {
   async getUserFromDb(steamid: string) {
     const user = await this.userRepository.findOne({
       where: { steamid },
-      relations: { games: true },
     });
     return user;
   }
