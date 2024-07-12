@@ -18,12 +18,7 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {}
 
-  private readonly returnUrl = `https://${this.configService.get<string>('NEST_API_BASE_URL')}`;
-  private frontendPort = this.configService.get<number>('FRONT_END_PORT', 5173);
-  private frontHost = this.configService.get<string>(
-    'FRONT_END_BASE_URL',
-    'localhost',
-  );
+  private readonly frontendUrl = this.configService.get<string>('FRONT_END_URL');
   @Get('login')
   @ApiResponse({
     status: 302,
@@ -52,9 +47,8 @@ export class AuthController {
 
       this.authService.responseWithTokens(res, accessToken, refreshToken);
 
-      // res.clearCookie('returnTo');
-      console.log(`Redirect to ${this.frontHost}`);
-      res.redirect(`https://${this.frontHost}`);
+      res.clearCookie('returnTo');
+      res.redirect(this.frontendUrl);
     } catch (error) {
       console.error('login/return error:', error);
       throw new UnauthorizedException('Authentication failed');

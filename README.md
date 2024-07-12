@@ -15,4 +15,4 @@
 1. 작업 폴더 생성
 2. 작업 폴더에 코드 클론해서 가져오기
 3. .env-example -> .env 이름 변경 후 파일 수정 후 저장
-4. 작업폴더에서 docker-compose up --build 명령어 실행
+4. 작업폴더에서 docker-compose -f docker-compose.dev.yml up --build 명령어 실행
