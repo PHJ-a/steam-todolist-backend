@@ -5,6 +5,18 @@ services:
     platform: linux/amd64
     ports:
       - '80:3000'
+    command: >
+      sh -c "
+        echo 'Environment variables:' &&
+        echo 'NODE_ENV: '$NODE_ENV &&
+        echo 'MYSQL_CONTAINER_NAME: '$MYSQL_CONTAINER_NAME &&
+        echo 'MYSQL_DATABASE: '$MYSQL_DATABASE &&
+        echo 'MYSQL_USER: '$MYSQL_USER &&
+        echo 'STEAM_API_KEY: '$STEAM_API_KEY &&
+        echo 'NEST_API_BASE_URL: '$NEST_API_BASE_URL &&
+        echo 'FRONT_END_PORT: '$FRONT_END_PORT &&
+        echo 'FRONT_END_BASE_URL: '$FRONT_END_BASE_URL &&
+        exec node dist/main"
     environment:
       - NODE_ENV=${NODE_ENV}
       - MYSQL_CONTAINER_NAME=${MYSQL_CONTAINER_NAME}
