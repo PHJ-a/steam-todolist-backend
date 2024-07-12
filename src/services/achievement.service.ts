@@ -132,7 +132,7 @@ export class AchievementService {
         displayName: achieve.displayName,
         description: achieve.description,
         achieved: userAchievementsMap.get(achieve.name).achieved,
-        unlocktime: unlocktime === 0 ? null : new Date(unlocktime),
+        unlockTime: unlocktime === 0 ? null : new Date(unlocktime),
         img:
           userAchievementsMap.get(achieve.name).achieved === 0
             ? achieve.icon_gray
