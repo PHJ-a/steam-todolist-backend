@@ -144,22 +144,22 @@ export class AuthService {
   ): void {
     res.cookie('jwt', accessToken, {
       secure: true,
-      sameSite: 'none',
       httpOnly: true,
       maxAge: this.accessExpireTime,
+      domain: '.steam-todo.gjeodnd12165.site',
     });
 
     res.cookie('refreshToken', refreshToken, {
       secure: true,
-      sameSite: 'none',
       httpOnly: true,
       maxAge: this.refreshExpireTime,
+      domain: '.steam-todo.gjeodnd12165.site',
     });
 
     res.cookie('isLoggedIn', 'true', {
       secure: true,
-      sameSite: 'none',
       maxAge: this.accessExpireTime,
+      domain: '.steam-todo.gjeodnd12165.site',
     });
   }
 
