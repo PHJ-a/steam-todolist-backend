@@ -14,14 +14,14 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const backendPort = configService.get<number>('NEST_API_PORT', 3000);
   const backendHost = configService.get<string>('NEST_API_BASE_URL');
-  const frontendPort = configService.get<number>('FRONT_END_PORT', 5173);
+  const frontendPort = configService.get<number>('FRONT_END_PORT', 443);
   const frontHost = configService.get<string>(
     'FRONT_END_BASE_URL',
     'localhost',
   );
   // baseUrl
-  const backendRootUrl = `http://${backendHost}`;
-  const frontendRootUrl = `http://${frontHost}:${frontendPort}`;
+  const backendRootUrl = `https://${backendHost}`;
+  const frontendRootUrl = `https://${frontHost}`;
   const config = new DocumentBuilder()
     .setTitle('Steam Todo APi Doc')
     .setDescription('Steam Todo 백엔드 api 문서')
