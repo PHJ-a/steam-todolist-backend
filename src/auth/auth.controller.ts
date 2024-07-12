@@ -30,9 +30,9 @@ export class AuthController {
   })
   async steamLogin(@Req() req: Request, @Res() res: Response) {
     const steamLoginUrl = await this.authService.getSteamLoginUrl();
-    const origin = `${this.frontHost}:${this.frontendPort}`;
+    const origin = `${this.frontHost}`;
 
-    res.cookie('returnTo', origin, { httpOnly: true });
+    // res.cookie('returnTo', origin, { httpOnly: true });
 
     res.redirect(steamLoginUrl);
   }
@@ -54,8 +54,9 @@ export class AuthController {
 
       this.authService.responseWithTokens(res, accessToken, refreshToken);
 
-      res.clearCookie('returnTo');
-      res.redirect(`${this.frontHost}:${this.frontendPort}`);
+      // res.clearCookie('returnTo');
+      console.log(`Redirect to ${this.frontHost}`)
+      res.redirect(`https://${this.frontHost}`);
     } catch (error) {
       console.error('login/return error:', error);
       throw new UnauthorizedException('Authentication failed');
