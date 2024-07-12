@@ -6,7 +6,7 @@ export class AppController {
   @HttpCode(200)
   healthCheck() {
     return {
-      message: 'ok'
-    }
+      message: 'ok',
+    };
   }
 }

@@ -8,8 +8,9 @@ import {
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { ConfigService } from '@nestjs/config';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller()
 export class AuthController {
   constructor(
@@ -30,9 +31,6 @@ export class AuthController {
   })
   async steamLogin(@Req() req: Request, @Res() res: Response) {
     const steamLoginUrl = await this.authService.getSteamLoginUrl();
-    const origin = `${this.frontHost}`;
-
-    // res.cookie('returnTo', origin, { httpOnly: true });
 
     res.redirect(steamLoginUrl);
   }
@@ -55,7 +53,7 @@ export class AuthController {
       this.authService.responseWithTokens(res, accessToken, refreshToken);
 
       // res.clearCookie('returnTo');
-      console.log(`Redirect to ${this.frontHost}`)
+      console.log(`Redirect to ${this.frontHost}`);
       res.redirect(`https://${this.frontHost}`);
     } catch (error) {
       console.error('login/return error:', error);

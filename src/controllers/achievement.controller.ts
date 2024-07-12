@@ -1,9 +1,11 @@
-import { Controller, Get, Param, UseFilters, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { AchievementService } from '../services/achievement.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { FetchAchieveDto } from '../dtos/req-achieve.dto';
 import {
   ApiCookieAuth,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -11,6 +13,7 @@ import {
 import { plainToClass } from 'class-transformer';
 import { ResAchieveWithUserDto } from '../dtos/res-achieve.dto';
 import { UserDeco } from 'src/decorators/user.decorator';
+import { ExceptionFilterRes } from 'src/dtos/res-exception.dto';
 
 @ApiTags('Achievement')
 @ApiCookieAuth('access-token')
@@ -25,6 +28,14 @@ export class AchievementController {
       '도전과제와 달성률을 패칭하고 유저의 도전과제 정보를 가져옵니다.',
   })
   @ApiResponse({ status: 200, type: ResAchieveWithUserDto })
+  @ApiNotFoundResponse({
+    type: ExceptionFilterRes,
+    description: 'DB에 해당 리소스를 찾을 수 없음. 메세지에 자세한 사항 표시',
+  })
+  @ApiInternalServerErrorResponse({
+    type: ExceptionFilterRes,
+    description: 'DB 저장 실패',
+  })
   @Get('/:gameId')
   async fetchUserAchievement(
     @UserDeco('steamid') steamid: string,

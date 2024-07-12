@@ -1,9 +1,10 @@
 import { Controller, Get, UseGuards, NotFoundException } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from '../entities/user.entity';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserDeco } from 'src/decorators/user.decorator';
 
+@ApiTags('User')
 @Controller('user')
 @UseGuards(AuthGuard)
 export class UserController {
