@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Redirect,
   Req,
   Res,
   UnauthorizedException,
@@ -56,7 +55,8 @@ export class AuthController {
       this.authService.responseWithTokens(res, accessToken, refreshToken);
 
       // res.clearCookie('returnTo');
-      res.redirect('/');
+      console.log(`Redirect to ${this.frontHost}`)
+      res.redirect(`https://${this.frontHost}`);
     } catch (error) {
       console.error('login/return error:', error);
       throw new UnauthorizedException('Authentication failed');
