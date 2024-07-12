@@ -166,17 +166,17 @@ export class AuthService {
   clearAllCookies(res: Response): void {
     res.clearCookie('jwt', {
       secure: true,
-      sameSite: 'none',
       httpOnly: true,
+      domain: '.steam-todo.gjeodnd12165.site',
     });
     res.clearCookie('refreshToken', {
       secure: true,
-      sameSite: 'none',
       httpOnly: true,
+      domain: '.steam-todo.gjeodnd12165.site',
     });
     res.clearCookie('isLoggedIn', {
       secure: true,
-      sameSite: 'none',
+      domain: '.steam-todo.gjeodnd12165.site',
     });
   }
 }
