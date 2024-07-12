@@ -17,8 +17,12 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {}
 
-  private readonly returnUrl = `https://${this.configService.get<string>('NEST_API_BASE_URL')}:${this.configService.get<string>('NEST_API_PORT')}`;
-
+  private readonly returnUrl = `https://${this.configService.get<string>('NEST_API_BASE_URL')}`;
+  private frontendPort = this.configService.get<number>('FRONT_END_PORT', 5173);
+  private frontHost = this.configService.get<string>(
+    'FRONT_END_BASE_URL',
+    'localhost',
+  );
   @Get('login')
   @ApiResponse({
     status: 302,
@@ -26,8 +30,7 @@ export class AuthController {
   })
   async steamLogin(@Req() req: Request, @Res() res: Response) {
     const steamLoginUrl = await this.authService.getSteamLoginUrl();
-    const referer = req.headers.referer;
-    const origin = referer ? new URL(referer).origin : this.returnUrl;
+    const origin = `${this.frontHost}:${this.frontendPort}`;
 
     res.cookie('returnTo', origin, { httpOnly: true });
 
@@ -51,9 +54,8 @@ export class AuthController {
 
       this.authService.responseWithTokens(res, accessToken, refreshToken);
 
-      const returnTo = req.cookies.returnTo || this.returnUrl;
       res.clearCookie('returnTo');
-      res.redirect(returnTo);
+      res.redirect(`${this.frontHost}:${this.frontendPort}`);
     } catch (error) {
       console.error('login/return error:', error);
       throw new UnauthorizedException('Authentication failed');
