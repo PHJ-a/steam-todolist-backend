@@ -36,9 +36,7 @@ export class GameController {
   })
   @Get()
   async getUserGame(@UserDeco() user: User) {
-    await this.gameService.fetchGames(user);
-
-    const games = await this.gameService.getUserGamesFromSteam(user.steamid);
+    const games = await this.gameService.fetchGames(user);
     return games.map((game) => new ResGameDto(game));
   }
 }
