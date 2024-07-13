@@ -45,9 +45,11 @@ export class AchievementController {
 
     const exist = await this.achievementService.checkAchieveExist(gameId);
 
-    await this.achievementService.fetchAchievesAndRate(gameId, steamid, !exist);
-    const achievements =
-      await this.achievementService.getAllAchievementAboutUser(gameId, steamid);
+    const achievements = await this.achievementService.fetchAchievesAndRate(
+      gameId,
+      steamid,
+      !exist,
+    );
 
     const data = { achievements, gameId };
     return plainToClass(ResAchieveWithUserDto, data);
