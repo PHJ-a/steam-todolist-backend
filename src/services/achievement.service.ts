@@ -14,6 +14,7 @@ import {
   IAchieveUserStat,
   ICompletedRateFromSteam,
 } from 'src/types/steam.api.type';
+import { ResAchieveWithUserDto } from 'src/dtos/res-achieve.dto';
 @Injectable()
 export class AchievementService {
   constructor(
@@ -121,7 +122,7 @@ export class AchievementService {
     gameId: number;
     steamid: string;
     achievesData: Achievement[];
-  }) {
+  }): Promise<ResAchieveWithUserDto[]> {
     const userStats = await this.getUserAchievementFromSteam(
       arg.gameId,
       arg.steamid,
@@ -136,22 +137,24 @@ export class AchievementService {
     for (const userStat of userStats) {
       userAchievementsMap.set(userStat.apiname, userStat);
     }
-    const achievements = arg.achievesData.map((achieve) => {
-      const unlocktime =
-        userAchievementsMap.get(achieve.name).unlocktime * 1000;
-      return {
-        id: achieve.id,
-        displayName: achieve.displayName,
-        description: achieve.description,
-        achieved: userAchievementsMap.get(achieve.name).achieved,
-        unlockTime: unlocktime === 0 ? null : new Date(unlocktime),
-        img:
-          userAchievementsMap.get(achieve.name).achieved === 0
-            ? achieve.icon_gray
-            : achieve.icon,
-        completedRate: achieve.completed_rate.toFixed(2),
-      };
-    });
+    const achievements: ResAchieveWithUserDto[] = arg.achievesData.map(
+      (achieve) => {
+        const unlocktime =
+          userAchievementsMap.get(achieve.name).unlocktime * 1000;
+        return {
+          id: achieve.id,
+          displayName: achieve.displayName,
+          description: achieve.description,
+          achieved: userAchievementsMap.get(achieve.name).achieved,
+          unlockTime: unlocktime === 0 ? null : new Date(unlocktime),
+          img:
+            userAchievementsMap.get(achieve.name).achieved === 0
+              ? achieve.icon_gray
+              : achieve.icon,
+          completedRate: achieve.completed_rate.toFixed(2),
+        };
+      },
+    );
     return achievements;
   }
 

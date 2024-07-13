@@ -11,7 +11,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { plainToClass } from 'class-transformer';
-import { ResAchieveWithUserDto } from '../dtos/res-achieve.dto';
+import { ResAchieveFetchingDto } from '../dtos/res-achieve.dto';
 import { UserDeco } from 'src/decorators/user.decorator';
 import { ExceptionFilterRes } from 'src/dtos/res-exception.dto';
 
@@ -27,7 +27,7 @@ export class AchievementController {
     description:
       '도전과제와 달성률을 패칭하고 유저의 도전과제 정보를 가져옵니다.',
   })
-  @ApiResponse({ status: 200, type: ResAchieveWithUserDto })
+  @ApiResponse({ status: 200, type: ResAchieveFetchingDto })
   @ApiNotFoundResponse({
     type: ExceptionFilterRes,
     description: 'DB에 해당 리소스를 찾을 수 없음. 메세지에 자세한 사항 표시',
@@ -52,6 +52,6 @@ export class AchievementController {
     );
 
     const data = { achievements, gameId };
-    return plainToClass(ResAchieveWithUserDto, data);
+    return plainToClass(ResAchieveFetchingDto, data);
   }
 }
