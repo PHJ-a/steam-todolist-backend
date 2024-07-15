@@ -56,10 +56,10 @@ export class GameService {
 
           // db에 게임이 존재하지 않는 경우
           if (!dbGame) {
-            const newGame = this.gameRepository.create({
-              appid: gameFromSteam.appid,
-              name: gameFromSteam.name,
-            }) as Game;
+            const newGame = new Game();
+            newGame.appid = gameFromSteam.appid;
+            newGame.name = gameFromSteam.name;
+
             notExistDbGames.push(newGame);
           }
         }
@@ -89,7 +89,7 @@ export class GameService {
     try {
       const steamApiKey = this.configService.get<string>('STEAM_API_KEY');
       const { data } = await axios.get(
-        `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${steamApiKey}&steamid=${steamid}&include_appinfo=1`,
+        `http://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${steamApiKey}&steamid=${steamid}&include_appinfo=1`,
       );
       /** 스팀에서 가져온 해당 유저가 보유한 게임 목록 */
       const gamesFromSteam = data.response.games;
