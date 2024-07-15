@@ -28,7 +28,7 @@ jobs:
     - name: Health check
       run: |
         chmod +x ./.github/workflows/health_check.sh
-        ./scripts/health_check.sh
+        ./.github/workflows/health_check.sh
 
     - name: View logs
       if: failure()
