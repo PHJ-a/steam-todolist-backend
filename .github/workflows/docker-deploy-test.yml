@@ -2,8 +2,7 @@ name: Branch CI/CD with Dev Docker
 
 on:
   push:
-    branches-ignore:
-      - 'main'
+    branches-ignore: [ main, github-actions ]
 
 jobs:
   build-and-test:
