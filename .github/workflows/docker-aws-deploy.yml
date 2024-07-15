@@ -25,6 +25,25 @@ jobs:
         push: true
         tags: gjeodnd12165/steam-todo:latest
     
+    - name: Install jq
+      run: sudo apt-get install jq -y
+
+    - name: Generate .ebextensions config
+      run: |
+        mkdir -p .ebextensions
+        echo "option_settings:" > .ebextensions/env.config
+        echo "  aws:elasticbeanstalk:application:environment:" >> .ebextensions/env.config
+        echo '${{ toJson(secrets) }}' | jq 'to_entries | 
+          map(select(.key | 
+            test("^(AWS|DOCKERHUB)") | not)) | 
+          from_entries' |
+        jq -r 'to_entries[] | "    \(.key): \"\(.value)\""' >> .ebextensions/env.config
+        echo "    ENVIRONMENT: \"${{ vars.ENVIRONMENT }}\"" >> .ebextensions/env.config
+
+    - name: Create deployment package
+      run: |
+        zip -r deploy.zip .ebextensions docker-compose.yml
+    
     - name: Deploy to Elastic Beanstalk
       uses: einaregilsson/beanstalk-deploy@v22
       with:
@@ -34,4 +53,4 @@ jobs:
         application_name: steam-todo
         environment_name: steam-todo-env
         region: ap-northeast-2
-        deployment_package: docker-compose.yml
+        deployment_package: deploy.zip
