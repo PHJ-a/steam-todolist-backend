@@ -2,7 +2,7 @@ name: Docker Build and Deploy
 
 on:
   push:
-    branches: [ main, github-actions ]
+    branches: [ main ]
 
 jobs:
   build-and-push:
