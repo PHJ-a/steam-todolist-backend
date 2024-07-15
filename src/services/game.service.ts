@@ -42,30 +42,30 @@ export class GameService {
       }
     } else {
       // db에 없는 게임만 db에 저장
+
+      const dbGameMap = new Map<number, Game>();
+      for (const dbGame of dbGames) {
+        dbGameMap.set(dbGame.appid, dbGame);
+      }
+
+      /** db에 없는 게임 */
+      const notExistDbGames: Game[] = [];
+
+      for (const gameFromSteam of gamesFromSteam) {
+        const dbGame: Game = dbGameMap.get(gameFromSteam.appid);
+
+        // db에 게임이 존재하지 않는 경우
+        if (!dbGame) {
+          const newGame = new Game();
+          newGame.appid = gameFromSteam.appid;
+          newGame.name = gameFromSteam.name;
+
+          notExistDbGames.push(newGame);
+        }
+      }
       try {
-        const dbGameMap = new Map<number, Game>();
-        for (const dbGame of dbGames) {
-          dbGameMap.set(dbGame.appid, dbGame);
-        }
-
-        /** db에 없는 게임 */
-        const notExistDbGames: Game[] = [];
-
-        for (const gameFromSteam of gamesFromSteam) {
-          const dbGame: Game = dbGameMap.get(gameFromSteam.appid);
-
-          // db에 게임이 존재하지 않는 경우
-          if (!dbGame) {
-            const newGame = new Game();
-            newGame.appid = gameFromSteam.appid;
-            newGame.name = gameFromSteam.name;
-
-            notExistDbGames.push(newGame);
-          }
-        }
-
         if (notExistDbGames.length > 0) {
-          await this.gameRepository.save(notExistDbGames);
+          await this.gameRepository.insert(notExistDbGames);
         }
       } catch (error) {
         throw new InternalServerErrorException('DB에 게임 업데이트 실패');
@@ -89,7 +89,7 @@ export class GameService {
     try {
       const steamApiKey = this.configService.get<string>('STEAM_API_KEY');
       const { data } = await axios.get(
-        `http://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${steamApiKey}&steamid=${steamid}&include_appinfo=1`,
+        `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${steamApiKey}&steamid=${steamid}&include_appinfo=1`,
       );
       /** 스팀에서 가져온 해당 유저가 보유한 게임 목록 */
       const gamesFromSteam = data.response.games;
