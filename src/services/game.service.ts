@@ -37,53 +37,43 @@ export class GameService {
       }
       try {
         await this.gameRepository.save(willSaved);
-        return { msg: '첫 게임 저장' };
       } catch (error) {
         throw new InternalServerErrorException('DB에 게임 저장 실패');
       }
     } else {
-      const dbGameMap = new Map<number, Game>();
-      for (const dbGame of dbGames) {
-        dbGameMap.set(dbGame.appid, dbGame);
-      }
-
-      /** db에 없는 게임 */
-      const notExistDbGames: Game[] = [];
-
-      // /** db에 있는 게임 유저 업데이트*/
-      // const updateDbGames: Game[] = [];
-
-      for (const gameFromSteam of gamesFromSteam) {
-        const dbGame: Game = dbGameMap.get(gameFromSteam.appid);
-
-        // db에 게임이 존재하지 않는 경우
-        if (!dbGame) {
-          const newGame = this.gameRepository.create({
-            appid: gameFromSteam.appid,
-            name: gameFromSteam.name,
-          }) as Game;
-          notExistDbGames.push(newGame);
-        }
-      }
-
+      // db에 없는 게임만 db에 저장
       try {
+        const dbGameMap = new Map<number, Game>();
+        for (const dbGame of dbGames) {
+          dbGameMap.set(dbGame.appid, dbGame);
+        }
+
+        /** db에 없는 게임 */
+        const notExistDbGames: Game[] = [];
+
+        for (const gameFromSteam of gamesFromSteam) {
+          const dbGame: Game = dbGameMap.get(gameFromSteam.appid);
+
+          // db에 게임이 존재하지 않는 경우
+          if (!dbGame) {
+            const newGame = this.gameRepository.create({
+              appid: gameFromSteam.appid,
+              name: gameFromSteam.name,
+            }) as Game;
+            notExistDbGames.push(newGame);
+          }
+        }
+
         if (notExistDbGames.length > 0) {
           await this.gameRepository.save(notExistDbGames);
-          return { msg: '새로운 게임 업데이트' };
-        } else {
-          return { msg: '저장할 필요 없음' };
         }
       } catch (error) {
         throw new InternalServerErrorException('DB에 게임 업데이트 실패');
       }
     }
+    return gamesFromSteam;
   }
 
-  // async findOwnedGame(steamid: string) {
-  //   const ownedGame = await this.gameRepository.find({});
-
-  //   return ownedGame;
-  // }
   async findGameById(gameId: number) {
     const game = await this.gameRepository.findOne({
       where: { appid: gameId },
@@ -101,7 +91,6 @@ export class GameService {
       const { data } = await axios.get(
         `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${steamApiKey}&steamid=${steamid}&include_appinfo=1`,
       );
-
       /** 스팀에서 가져온 해당 유저가 보유한 게임 목록 */
       const gamesFromSteam = data.response.games;
       return gamesFromSteam;

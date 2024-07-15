@@ -17,13 +17,13 @@ export class ResAchieveWithUserDto {
   img: string;
 
   @ApiProperty({ example: '12.13' })
-  completedRate: number;
+  completedRate: string;
 
   @ApiProperty()
   unlockTime: Date | null;
 }
 
-export class AchieveFetchingDto {
+export class ResAchieveFetchingDto {
   @ApiProperty({ type: [ResAchieveWithUserDto] })
   achievements: ResAchieveWithUserDto[];
 

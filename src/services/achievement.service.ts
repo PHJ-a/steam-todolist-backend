@@ -14,6 +14,7 @@ import {
   IAchieveUserStat,
   ICompletedRateFromSteam,
 } from 'src/types/steam.api.type';
+import { ResAchieveWithUserDto } from 'src/dtos/res-achieve.dto';
 @Injectable()
 export class AchievementService {
   constructor(
@@ -40,19 +41,27 @@ export class AchievementService {
 
   async fetchAchievesAndRate(
     gameId: number,
-    steamId: string,
+    steamid: string,
     isInit: boolean = false,
   ) {
+    let achievesData: Achievement[];
     if (isInit) {
       const saved = await this.initSaveAchievement(gameId);
-      await this.updateAchievementCompletionRates(gameId, saved);
+      achievesData = await this.updateAchievementCompletionRates(gameId, saved);
     } else {
       const achieves = await this.achievementRepository.find({
         where: { game_id: gameId },
       });
-      await this.updateAchievementCompletionRates(gameId, achieves);
+      achievesData = await this.updateAchievementCompletionRates(
+        gameId,
+        achieves,
+      );
     }
-    return await this.getAllAchievementAboutUser(gameId, steamId);
+    return await this.mergeUserStatsAndAchieves({
+      gameId,
+      steamid,
+      achievesData,
+    });
   }
 
   /** 해당 게임 도전과제 메타 데이터 db에 저장 */
@@ -109,13 +118,17 @@ export class AchievementService {
   }
 
   /** 유저 데이터 가져와서 각 도전과제 달성 여부 합치기 */
-  async getAllAchievementAboutUser(gameId: number, steamid: string) {
-    const [userStats, allAchieves] = await Promise.all([
-      this.getUserAchievementFromSteam(gameId, steamid),
-      this.achievementRepository.find({ where: { game_id: gameId } }),
-    ]);
+  async mergeUserStatsAndAchieves(arg: {
+    gameId: number;
+    steamid: string;
+    achievesData: Achievement[];
+  }): Promise<ResAchieveWithUserDto[]> {
+    const userStats = await this.getUserAchievementFromSteam(
+      arg.gameId,
+      arg.steamid,
+    );
 
-    if (allAchieves.length === 0) {
+    if (arg.achievesData.length === 0) {
       throw new NotFoundException(
         '해당 게임에 대한 도전과제 데이터가 없습니다.',
       );
@@ -124,22 +137,24 @@ export class AchievementService {
     for (const userStat of userStats) {
       userAchievementsMap.set(userStat.apiname, userStat);
     }
-    const achievements = allAchieves.map((achieve) => {
-      const unlocktime =
-        userAchievementsMap.get(achieve.name).unlocktime * 1000;
-      return {
-        id: achieve.id,
-        displayName: achieve.displayName,
-        description: achieve.description,
-        achieved: userAchievementsMap.get(achieve.name).achieved,
-        unlockTime: unlocktime === 0 ? null : new Date(unlocktime),
-        img:
-          userAchievementsMap.get(achieve.name).achieved === 0
-            ? achieve.icon_gray
-            : achieve.icon,
-        completedRate: achieve.completed_rate,
-      };
-    });
+    const achievements: ResAchieveWithUserDto[] = arg.achievesData.map(
+      (achieve) => {
+        const unlocktime =
+          userAchievementsMap.get(achieve.name).unlocktime * 1000;
+        return {
+          id: achieve.id,
+          displayName: achieve.displayName,
+          description: achieve.description,
+          achieved: userAchievementsMap.get(achieve.name).achieved,
+          unlockTime: unlocktime === 0 ? null : new Date(unlocktime),
+          img:
+            userAchievementsMap.get(achieve.name).achieved === 0
+              ? achieve.icon_gray
+              : achieve.icon,
+          completedRate: achieve.completed_rate.toFixed(2),
+        };
+      },
+    );
     return achievements;
   }
 
@@ -149,11 +164,10 @@ export class AchievementService {
   async getAchieveFromSteam(gameId: number) {
     try {
       const steamApiKey = this.configService.get<string>('STEAM_API_KEY');
-      const achievements = (
-        await axios.get(
-          `http://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?appid=${gameId}&key=${steamApiKey}&l=koreana`,
-        )
-      ).data.game.availableGameStats.achievements;
+      const steamRes = await axios.get(
+        `http://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?appid=${gameId}&key=${steamApiKey}&l=koreana`,
+      );
+      const achievements = steamRes.data.game.availableGameStats.achievements;
       return achievements;
     } catch (error) {
       throw new ServiceUnavailableException(
