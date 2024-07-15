@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class ResAchieveWithUserDto {
   @ApiProperty({ example: 123 })
@@ -20,6 +21,7 @@ export class ResAchieveWithUserDto {
   completedRate: string;
 
   @ApiProperty()
+  @Transform(({ value }) => (value !== null ? new Date(value * 1000) : null))
   unlockTime: Date | null;
 }
 

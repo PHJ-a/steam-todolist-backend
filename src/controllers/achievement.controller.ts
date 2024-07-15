@@ -8,6 +8,7 @@ import {
   ApiNotFoundResponse,
   ApiOperation,
   ApiResponse,
+  ApiServiceUnavailableResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { plainToClass } from 'class-transformer';
@@ -35,6 +36,10 @@ export class AchievementController {
   @ApiInternalServerErrorResponse({
     type: ExceptionFilterRes,
     description: 'DB 저장 실패',
+  })
+  @ApiServiceUnavailableResponse({
+    type: ExceptionFilterRes,
+    description: '서버가 스팀에 요청한 api가 실패',
   })
   @Get('/:gameId')
   async fetchUserAchievement(
