@@ -3,13 +3,11 @@
 
 
 ## ERD
-![스크린샷 2024-07-08 11 51 27](https://github.com/PHJ-a/steam-todolist-backend/assets/156567892/10ef3e58-cdbf-4de9-91e1-76c69997a3aa)
+![스크린샷 2024-07-15 10 08 19](https://github.com/user-attachments/assets/f05717f4-117e-4f2c-8c1c-97ffecccb7e0)
 <br/>
 
 ## API 명세
-[저장소의 wiki 문서를 확인해주세요.](https://github.com/PHJ-a/steam-todolist-backend/wiki/Todo)
-
-
+swagger로 제공
 
 ## 프로젝트 클론 및 Docker 환경 구성
 1. 작업 폴더 생성
