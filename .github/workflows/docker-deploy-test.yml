@@ -1,0 +1,41 @@
+name: Branch CI/CD with Dev Docker
+
+on:
+  push:
+    branches-ignore:
+      - 'main'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    environment: development
+    
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install jq
+      run: sudo apt-get install jq -y
+
+    - name: Create .env file from secrets
+      run: |
+        echo '${{ toJson(secrets) }}' | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' > .env
+
+    - name: Build and run with docker-compose
+      run: |
+        docker-compose -f docker-compose.dev.yml up -d --build
+        sleep 20
+
+    - name: Health check
+      run: |
+        chmod +x ./scripts/health_check.sh
+        ./scripts/health_check.sh
+
+    - name: View logs
+      if: failure()
+      run: docker-compose -f docker-compose.dev.yml logs
+
+    - name: Clean up
+      if: always()
+      run: |
+        docker-compose -f docker-compose.dev.yml down -v
+        rm .env
