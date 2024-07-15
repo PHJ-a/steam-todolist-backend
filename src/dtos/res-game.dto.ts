@@ -8,12 +8,15 @@ export class ResGameDto {
   @ApiProperty()
   playTime: number;
   @ApiProperty()
-  lastPlayedTime: Date;
+  lastPlayedTime: Date | null;
 
   constructor(data: any) {
     this.appid = data.appid;
     this.name = data.name;
     this.playTime = data.playtime_forever;
-    this.lastPlayedTime = new Date(data.rtime_last_played * 1000);
+    this.lastPlayedTime =
+      data.rtime_last_played === 0
+        ? null
+        : new Date(data.rtime_last_played * 1000);
   }
 }
