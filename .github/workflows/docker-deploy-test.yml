@@ -27,7 +27,7 @@ jobs:
 
     - name: Health check
       run: |
-        chmod +x ./scripts/health_check.sh
+        chmod +x ./.github/workflows/health_check.sh
         ./scripts/health_check.sh
 
     - name: View logs
