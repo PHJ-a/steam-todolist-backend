@@ -44,19 +44,19 @@ export class AchievementService {
     steamid: string,
     isInit: boolean = false,
   ) {
-    let achievesData: Achievement[];
     if (isInit) {
-      const saved = await this.initSaveAchievement(gameId);
-      achievesData = await this.updateAchievementCompletionRates(gameId, saved);
-    } else {
-      const achieves = await this.achievementRepository.find({
-        where: { game_id: gameId },
-      });
-      achievesData = await this.updateAchievementCompletionRates(
-        gameId,
-        achieves,
-      );
+      await this.initSaveAchievement(gameId);
     }
+    const achieves = await this.achievementRepository.find({
+      where: { game_id: gameId },
+    });
+    if (achieves.length === 0) {
+      throw new NotFoundException('해당 게임 도전과제는 존재하지 않습니다.');
+    }
+    const achievesData = await this.updateAchievementCompletionRates(
+      gameId,
+      achieves,
+    );
     return await this.mergeUserStatsAndAchieves({
       gameId,
       steamid,
@@ -64,7 +64,7 @@ export class AchievementService {
     });
   }
 
-  /** 해당 게임 도전과제 메타 데이터 db에 저장 */
+  /** 해당 게임 도전과제 데이터 db에 저장 */
   async initSaveAchievement(gameId: number) {
     const totalAchievements = await this.getAchieveFromSteam(gameId);
     /** 저장할 도전과제 데이터 청크 */
@@ -82,7 +82,8 @@ export class AchievementService {
     }
 
     try {
-      const savedAchieves = await this.achievementRepository.save(achieveChunk);
+      const savedAchieves =
+        await this.achievementRepository.insert(achieveChunk);
       return savedAchieves;
     } catch (error) {
       throw new InternalServerErrorException('도전과제 저장 실패F');
@@ -167,8 +168,13 @@ export class AchievementService {
       const steamRes = await axios.get(
         `http://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?appid=${gameId}&key=${steamApiKey}&l=koreana`,
       );
-      const achievements = steamRes.data.game.availableGameStats.achievements;
-      return achievements;
+
+      const gameStats = steamRes.data.game.availableGameStats;
+      if (gameStats === undefined || gameStats.achievements === undefined) {
+        return [];
+      }
+
+      return gameStats.achievements;
     } catch (error) {
       throw new ServiceUnavailableException(
         '스팀 도전과제 데이터 api요청 실패',
@@ -184,7 +190,6 @@ export class AchievementService {
           `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?appid=${gameId}&key=${steamApiKey}&steamid=${steamId}`,
         )
       ).data.playerstats.achievements;
-
       return statusUserAchievements;
     } catch {
       throw new ServiceUnavailableException('스팀 유저 진행상황 api요청 실패');
