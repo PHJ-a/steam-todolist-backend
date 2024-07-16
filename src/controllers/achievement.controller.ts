@@ -47,16 +47,21 @@ export class AchievementController {
     @Param() param: FetchAchieveDto,
   ) {
     const { gameId } = param;
+    try {
+      const exist = await this.achievementService.checkAchieveExist(gameId);
 
-    const exist = await this.achievementService.checkAchieveExist(gameId);
+      const achievements = await this.achievementService.fetchAchievesAndRate(
+        gameId,
+        steamid,
+        !exist,
+      );
 
-    const achievements = await this.achievementService.fetchAchievesAndRate(
-      gameId,
-      steamid,
-      !exist,
-    );
-
-    const data = { achievements, gameId };
-    return plainToClass(ResAchieveFetchingDto, data);
+      const data = { achievements, gameId };
+      return plainToClass(ResAchieveFetchingDto, data);
+    } catch (error) {
+      if (error.status === 404) {
+        return { achievements: [], gameId };
+      }
+    }
   }
 }
