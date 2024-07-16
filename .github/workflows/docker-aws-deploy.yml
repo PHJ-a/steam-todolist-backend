@@ -23,7 +23,7 @@ jobs:
       with:
         context: .
         push: true
-        tags: gjeodnd12165/steam-todo:latest
+        tags: gjeodnd12165/steam-todo:lts-alpine
     
     - name: Install jq
       run: sudo apt-get install jq -y
