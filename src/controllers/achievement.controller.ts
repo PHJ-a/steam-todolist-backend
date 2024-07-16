@@ -5,7 +5,6 @@ import { FetchAchieveDto } from '../dtos/req-achieve.dto';
 import {
   ApiCookieAuth,
   ApiInternalServerErrorResponse,
-  ApiNotFoundResponse,
   ApiOperation,
   ApiResponse,
   ApiServiceUnavailableResponse,
@@ -28,10 +27,11 @@ export class AchievementController {
     description:
       '도전과제와 달성률을 패칭하고 유저의 도전과제 정보를 가져옵니다.',
   })
-  @ApiResponse({ status: 200, type: ResAchieveFetchingDto })
-  @ApiNotFoundResponse({
-    type: ExceptionFilterRes,
-    description: 'DB에 해당 리소스를 찾을 수 없음. 메세지에 자세한 사항 표시',
+  @ApiResponse({
+    status: 200,
+    type: ResAchieveFetchingDto,
+    description:
+      '게임에 도전과제가 제공되지 않는 경우 achievements는 빈배열입니다.',
   })
   @ApiInternalServerErrorResponse({
     type: ExceptionFilterRes,
