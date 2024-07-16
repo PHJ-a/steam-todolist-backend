@@ -15,6 +15,7 @@ import { ResTodoDetailDto, ResTodoDto } from '../dtos/res-todo.dto';
 import { TodoBodyDto, TodoParamDto, TodoQueryDto } from '../dtos/req-todo.dto';
 import {
   ApiBody,
+  ApiConflictResponse,
   ApiCookieAuth,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
@@ -86,6 +87,10 @@ export class TodoController {
   @ApiNotFoundResponse({
     type: ExceptionFilterRes,
     description: '해당 todo가 없음.',
+  })
+  @ApiConflictResponse({
+    type: ExceptionFilterRes,
+    description: '스팀에 확인 후 실제로 완료되지 않은 경우',
   })
   @ApiInternalServerErrorResponse({
     type: ExceptionFilterRes,
