@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -79,22 +80,22 @@ export class TodoService {
         user.steamid,
       ),
     ]);
+
+    const newFetchingData = fetchingAchieve.filter(
+      (data) => data.apiname === achievement.name,
+    )[0];
+    // 실제로 도전과제가 완료되지 않은 경우
+    if (newFetchingData.achieved === 0) {
+      throw new ConflictException('해당 도전과제는 아직 완료되지 않았습니다.');
+    }
     try {
-      const newFetchingData = fetchingAchieve.filter(
-        (data) => data.apiname === achievement.name,
-      )[0];
-      // 실제로 도전과제가 완료되지 않은 경우
-      if (newFetchingData.achieved === 0) {
-        return null;
-      } else {
-        // 실제로 완료됐으면 db에도 업데이트
-        const updatedTodo = await this.todoRepository.save({
-          ...todo,
-          end: new Date(newFetchingData.unlocktime * 1000),
-          isFinished: true,
-        });
-        return updatedTodo;
-      }
+      // 실제로 완료됐으면 db에도 업데이트
+      const updatedTodo = await this.todoRepository.save({
+        ...todo,
+        end: new Date(newFetchingData.unlocktime * 1000),
+        isFinished: true,
+      });
+      return updatedTodo;
     } catch (error) {
       throw new InternalServerErrorException('Todo 완료 처리 실패');
     }
