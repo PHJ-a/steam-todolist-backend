@@ -1,6 +1,9 @@
 # steam-todolist-backend
 스팀 도전과제 투두 리스트 백엔드
 
+## 기술 스택
+![Web App Reference Architecture](https://github.com/user-attachments/assets/13f0f49b-b92d-47ed-8b3f-d8f46e44f08c)
+
 
 ## ERD
 ![스크린샷 2024-07-15 10 08 19](https://github.com/user-attachments/assets/f05717f4-117e-4f2c-8c1c-97ffecccb7e0)
