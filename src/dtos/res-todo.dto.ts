@@ -44,7 +44,9 @@ export class ResTodoDetailDto extends ResTodoDto {
     super(data);
     this.achieveTag = data.achievement.name;
     this.achieveDescription = data.achievement.description;
-    this.achieveIcon = data.achievement.icon_gray;
+    this.achieveIcon = data.isFinished
+      ? data.achievement.icon
+      : data.achievement.icon_gray;
     this.completedRate = data.achievement.completed_rate;
   }
 }
